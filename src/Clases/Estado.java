@@ -9,6 +9,10 @@ public class Estado {
         this.nombreEstado = nombreEstado;
     }
 
+    public boolean esCompletamenteRealizada() {
+        return this.nombreEstado.equalsIgnoreCase("Completamente realizada") && this.ambito.equals("Orden de Inspección");
+    }
+
     public String getNombreEstado() {
         return nombreEstado;
     }
@@ -28,6 +32,5 @@ public class Estado {
     public boolean esAmbito(String unAmbito) {
         return ambito.equals(unAmbito);
     }
-
 
 }

@@ -25,8 +25,16 @@ public class EstacionSismologica {
         return nombre;
     }
 
-    public Sismografo getSismografo() {
-        return sismografo;
+
+    public void setSismografo(Sismografo sismografo) {
+        this.sismografo = sismografo;
+    }
+
+    public String getIdentificadorSismografo() {
+        if (sismografo != null) {
+            return sismografo.getIdentificadorSismografo();
+        }
+        return "";
     }
 
 

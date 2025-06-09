@@ -4,7 +4,6 @@ public class Usuario {
     private String nombreUsuario;
     private String contraseña;
     private Empleado empleado;
-    private Perfil perfil;
 
     public Usuario(String nombreUsuario, String contraseña, Empleado empleado) {
         this.nombreUsuario = nombreUsuario;
@@ -16,5 +15,8 @@ public class Usuario {
         return empleado;
     }
 
+    public String getNombreUsuario() {
+        return nombreUsuario;
+    }
 
 }

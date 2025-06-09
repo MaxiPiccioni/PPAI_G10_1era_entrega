@@ -3,30 +3,21 @@ package Clases;
 import java.time.LocalDateTime;
 
 public class Sesion {
+    private Usuario usuario;
     private LocalDateTime fechaHoraInicio;
     private LocalDateTime fechaHoraFin;
-    private Usuario usuarioLogueado;
 
     public Sesion(Usuario usuario) {
-        this.fechaHoraInicio = fechaHoraInicio = LocalDateTime.now();
-        this.usuarioLogueado = usuario;
+        this.usuario = usuario;
+        this.fechaHoraInicio = LocalDateTime.now();
+        this.fechaHoraFin = null;
     }
 
-    public Empleado obtenerRILogueado() {
-        if (this.fechaHoraInicio != null &&
-                this.fechaHoraFin == null &&
-                this.usuarioLogueado != null &&
-                this.usuarioLogueado.obtenerEmpleado() != null) {
-
-            Empleado empleado = this.usuarioLogueado.obtenerEmpleado();
-            if (empleado.getRol().getNombreRol().equals("Responsable de Inspeccion")) {
-                return empleado;
-            }
+    public Usuario obtenerRILogueado() {
+        Empleado empleado = usuario.obtenerEmpleado();
+        if (empleado.getRol().getNombreRol().equalsIgnoreCase("Responsable de Inspección")) {
+            return usuario;
         }
         return null;
-    }
-
-    public Empleado obtenerEmpleado() {
-        return this.obtenerEmpleado();
     }
 }
