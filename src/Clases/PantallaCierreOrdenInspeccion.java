@@ -96,7 +96,7 @@ public class PantallaCierreOrdenInspeccion extends JFrame {
         tomarSeleccionOrden(tabla, mensajeSeleccion);
 
         nuevaVentana.setContentPane(panel);
-        nuevaVentana.pack();  // Ajusta ventana al contenido
+        nuevaVentana.pack();
         nuevaVentana.setLocationRelativeTo(null);
         nuevaVentana.setVisible(true);
     }

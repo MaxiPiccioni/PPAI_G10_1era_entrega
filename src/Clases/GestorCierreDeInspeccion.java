@@ -3,6 +3,7 @@ package Clases;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GestorCierreDeInspeccion {
     private OrdenDeInspeccion ordenSeleccionada;
@@ -12,6 +13,7 @@ public class GestorCierreDeInspeccion {
     private Empleado empleadoLogueado;
     private List<OrdenDeInspeccion> ordenes;
     private List<OrdenDeInspeccion> ordenesFiltradas;
+    private List<MotivoTipo> motivosTipo;
 
     public GestorCierreDeInspeccion(List<Empleado> empleados, Sesion sesion, List<OrdenDeInspeccion> ordenes) {
         this.empleados = empleados;
@@ -19,6 +21,7 @@ public class GestorCierreDeInspeccion {
         this.ordenes = ordenes;
         this.ordenesFiltradas = new ArrayList<>();
         this.empleadoLogueado = buscarEmpleado();
+        this.motivosTipo = new ArrayList<>();
     }
 
     public Empleado buscarEmpleado() {
@@ -62,5 +65,7 @@ public class GestorCierreDeInspeccion {
     public void tomarObservacion(String observacion) {
         ordenSeleccionada.setObservacion(observacion);
     }
+
+
 
 }

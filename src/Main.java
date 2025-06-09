@@ -3,6 +3,7 @@ import Clases.*;
 import javax.swing.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -64,6 +65,13 @@ public class Main {
         orden3.setEstado(estadoCompletamenteRealizada);
 
         List<OrdenDeInspeccion> ordenes = Arrays.asList(orden1, orden2, orden3);
+
+        // Tipos de motivo para Fuera de Servicio.
+        List<MotivoTipo> motivosFueraServicio = new ArrayList<>();
+        motivosFueraServicio.add(new MotivoTipo("Mantenimiento"));
+        motivosFueraServicio.add(new MotivoTipo("Falla técnica"));
+        motivosFueraServicio.add(new MotivoTipo("Actualización de software"));
+        motivosFueraServicio.add(new MotivoTipo("Inspección periódica"));
 
         // Crear el gestor
         GestorCierreDeInspeccion gestor = new GestorCierreDeInspeccion(empleados, sesionActiva, ordenes);
