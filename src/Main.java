@@ -19,32 +19,32 @@ public class Main {
 
         List<Empleado> empleados = Arrays.asList(empleado1, empleado2, empleado3);
 
-        // Usuario logueado
+        // Usuario logueado.
         Usuario usuarioLogueado = new Usuario("juan123", "clave123", empleado1);
 
-        // Sesión activa
+        // Sesión activa.
         Sesion sesionActiva = new Sesion(usuarioLogueado);
 
         // Crear estado: Estados de órdenes.
         Estado estadoCompletamenteRealizada = new Estado("Orden de Inspección", "Completamente Realizada");
         Estado pendiente = new Estado("Orden de Inspección", "Pendiente de Realizacion");
 
-        // Crear estaciones
+        // Crear estaciones.
         EstacionSismologica estacion1 = new EstacionSismologica(101, "Estación Centro");
         EstacionSismologica estacion2 = new EstacionSismologica(102, "Estación Norte");
         EstacionSismologica estacion3 = new EstacionSismologica(103, "Estación Sur");
 
-        // Crear sismógrafos y asociarlos a estaciones
+        // Crear sismógrafos y asociarlos a estaciones.
         Sismografo sismografo1 = new Sismografo(LocalDate.of(2023,1,15), "SIS-001", "SN1001", estacion1);
         Sismografo sismografo2 = new Sismografo(LocalDate.of(2024,3,10), "SIS-002", "SN1002", estacion2);
         Sismografo sismografo3 = new Sismografo(LocalDate.of(2022,6,5), "SIS-003", "SN1003", estacion3);
 
-        // Asignar sismógrafos a estaciones
+        // Asignar sismógrafos a estaciones.
         estacion1.setSismografo(sismografo1);
         estacion2.setSismografo(sismografo2);
         estacion3.setSismografo(sismografo3);
 
-        // Crear órdenes de inspección asociando estación sismológica
+        // Crear órdenes de inspección asociando estación sismológica.
         OrdenDeInspeccion orden1 = new OrdenDeInspeccion(
                 LocalDateTime.of(2025, 6, 4, 10, 0),
                 LocalDateTime.of(2025, 6, 4, 9, 0),

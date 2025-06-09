@@ -112,11 +112,9 @@ public class PantallaCierreOrdenInspeccion extends JFrame {
                         if (numeroOrdenObj != null) {
                             try {
                                 int numeroOrden = Integer.parseInt(numeroOrdenObj.toString());
-                                mensajeSeleccion.setText("Orden seleccionada: N° " + numeroOrden);
-                                gestor.tomarOrdenSeleccionada(numeroOrden);
-                                pedirObservacion(); // llamada directa tras la selección
+                                gestor.tomarSeleccionOrden(numeroOrden);
+                                pedirObservacion();
                             } catch (NumberFormatException ex) {
-                                mensajeSeleccion.setText("Error al seleccionar orden.");
                             }
                         }
                     }
@@ -150,9 +148,7 @@ public class PantallaCierreOrdenInspeccion extends JFrame {
         botonConfirmar.addActionListener(e -> {
             String observacion = campoObservacion.getText().trim();
             if (!observacion.isEmpty()) {
-                // Acá podrías llamar al gestor para continuar el flujo
-                System.out.println("Observación ingresada: " + observacion);
-                // gestor.registrarObservacion(observacion); // si lo implementás
+                tomarObservacion(observacion);
                 ventanaObservacion.dispose();
             } else {
                 JOptionPane.showMessageDialog(ventanaObservacion, "Debe ingresar una observación.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -165,6 +161,10 @@ public class PantallaCierreOrdenInspeccion extends JFrame {
 
         ventanaObservacion.setContentPane(panel);
         ventanaObservacion.setVisible(true);
+    }
+
+    public void tomarObservacion(String observacion) {
+        gestor.tomarObservacion(observacion);
     }
 
 }

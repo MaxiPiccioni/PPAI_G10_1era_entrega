@@ -6,6 +6,7 @@ import java.util.List;
 
 public class GestorCierreDeInspeccion {
     private OrdenDeInspeccion ordenSeleccionada;
+    private OrdenDeInspeccion observacionIngresada;
     private List<Empleado> empleados;
     private Sesion sesion;
     private Empleado empleadoLogueado;
@@ -22,7 +23,6 @@ public class GestorCierreDeInspeccion {
 
     public Empleado buscarEmpleado() {
         Usuario usuarioLogueado = sesion.obtenerRILogueado();
-
         if (usuarioLogueado != null) {
             empleadoLogueado = usuarioLogueado.obtenerEmpleado();
         }
@@ -35,14 +35,13 @@ public class GestorCierreDeInspeccion {
         if (empleadoLogueado == null) {
             return;
         }
-
         for (OrdenDeInspeccion orden : ordenes) {
-            if (orden.esDeRI(empleadoLogueado)) {
+            if (orden.esDeRI(empleadoLogueado) && orden.esCompletamenteRealizada()) {
                 ordenesFiltradas.add(orden);
             }
         }
-        if (ordenesFiltradas.isEmpty()) {
-            System.out.println("No se encontraron órdenes de inspección para el Responsable de Inspección logueado.");
+        if (ordenesFiltradas.isEmpty()) { //AGREGAR A LA PANTALLA ESA VERIFICACION.
+            System.out.println("No se encontraron órdenes completamente realizadas para el Responsable de Inspección logueado.");
         }
     }
 
@@ -51,7 +50,7 @@ public class GestorCierreDeInspeccion {
         return ordenesFiltradas;
     }
 
-    public void tomarOrdenSeleccionada(int numeroOrden) {
+    public void tomarSeleccionOrden(int numeroOrden) {
         for (OrdenDeInspeccion orden : this.ordenarPorFecha()) {
             if (orden.getNumeroOrden() == numeroOrden) {
                 this.ordenSeleccionada = orden;
@@ -60,6 +59,8 @@ public class GestorCierreDeInspeccion {
         }
     }
 
-
+    public void tomarObservacion(String observacion) {
+        ordenSeleccionada.setObservacion(observacion);
+    }
 
 }

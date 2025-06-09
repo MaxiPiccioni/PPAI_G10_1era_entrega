@@ -41,7 +41,6 @@ public class OrdenDeInspeccion {
         };
     }
 
-
     public LocalDateTime getFechaHoraFinalizacion() {
         return fechaHoraFinalizacion;
     }
@@ -54,8 +53,11 @@ public class OrdenDeInspeccion {
         this.estado = estado;
     }
 
+    public void setObservacion(String observacion) {
+        this.observacionCierre = observacion;
+    }
+
     public void setFechaHoraCierre(LocalDateTime fechaHoraCierre) {
         this.fechaHoraCierre = fechaHoraCierre;
     }
-
 }
