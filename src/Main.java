@@ -1,15 +1,30 @@
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import Clases.*;
+import javax.swing.*;
+import java.util.Arrays;
+import java.util.List;
+
 public class Main {
     public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+        Rol rolRI = new Rol("Responsable de Inspeccion");
+        Rol rolAyudante = new Rol("Ayudante");
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
+        Empleado empleado1 = new Empleado("Juan", "Pérez", "123456", "juan@mail.com", rolRI);
+        Empleado empleado2 = new Empleado("Ana", "Gómez", "654321", "ana@mail.com", rolRI);
+        Empleado empleado3 = new Empleado("Luis", "López", "987654", "luis@mail.com", rolAyudante);
+
+        List<Empleado> empleados = Arrays.asList(empleado1, empleado2, empleado3);
+        GestorCierreDeInspeccion gestor = new GestorCierreDeInspeccion(empleados);
+        List<Empleado> responsables = gestor.buscarEmpleado();
+
+        System.out.println("Responsables de Inspección:");
+        for (Empleado emp : responsables) {
+            System.out.println("- " + emp.getNombre());
         }
+
+        // --- Iniciar GUI después de la lógica ---
+        SwingUtilities.invokeLater(() -> {
+            PantallaCierreOrdenInspeccion pantalla = new PantallaCierreOrdenInspeccion();
+            pantalla.setVisible(true);
+        });
     }
 }

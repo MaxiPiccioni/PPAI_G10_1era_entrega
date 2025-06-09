@@ -5,6 +5,7 @@ public class CambioEstado {
     private LocalDateTime fechaHoraInicio;
     private LocalDateTime fechaHoraFin;
     private Estado estado;
+    private Empleado empleado;
 
     public CambioEstado(LocalDateTime fechaHoraInicio, LocalDateTime fechaHoraFin, Estado estado) {
         this.fechaHoraInicio = fechaHoraInicio;

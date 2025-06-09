@@ -6,31 +6,23 @@ public class Sismografo {
     private String identificadorSismografo;
     private String nroSerie;
     private CambioEstado estadoActual;
+    public EstacionSismologica estacionSismologica;
+    public Estado estado;
 
 
-    public Sismografo(LocalDate fechaAdquisicion, String identificadorSismografo, String nroSerie) {
+    public Sismografo(LocalDate fechaAdquisicion, String identificadorSismografo, String nroSerie,  CambioEstado estadoActual, EstacionSismologica estacionSismologica) {
         this.fechaAdquisicion = fechaAdquisicion;
         this.identificadorSismografo = identificadorSismografo;
         this.nroSerie = nroSerie;
-    }
-
-    public LocalDate getFechaAdquisicion() {
-        return fechaAdquisicion;
+        this.estadoActual = estadoActual;
+        this.estacionSismologica = estacionSismologica;
     }
 
     public String getIdentificadorSismografo() {
         return identificadorSismografo;
     }
 
-    public String getNroSerie() {
-        return nroSerie;
-    }
-
-    public CambioEstado getEstadoActual() {
-        return estadoActual;
-    }
-
-    public void setEstadoActual(CambioEstado estadoActual) {
+    public void setIdentificadorSismografo() {
         this.estadoActual = estadoActual;
     }
 

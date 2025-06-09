@@ -10,6 +10,7 @@ public class EstacionSismologica {
     private Integer longitud;
     private String nombre;
     private Integer nroCertificacionAdquisicion;
+    private Sismografo sismografo;
 
     public EstacionSismologica(int codigoEstacion, String nombre) {
         this.codigoEstacion = codigoEstacion;
@@ -22,6 +23,10 @@ public class EstacionSismologica {
 
     public String getNombre() {
         return nombre;
+    }
+
+    public Sismografo getSismografo() {
+        return sismografo;
     }
 
 
