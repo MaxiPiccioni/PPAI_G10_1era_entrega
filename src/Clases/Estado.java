@@ -17,9 +17,19 @@ public class Estado {
         return this.ambito.equals("Orden de Inspección");
     }
 
+    public boolean esAmbitoSismografo() {
+        return this.ambito.equals("Sismografo");
+    }
+
+
     public boolean esCerrada() {
         return nombreEstado.equals("Cerrada");
     }
+
+    public boolean esFueraDeServicio() {
+        return nombreEstado.equals("Fuera De Servicio");
+    }
+
 
     public String getNombreEstado() {
         return nombreEstado;

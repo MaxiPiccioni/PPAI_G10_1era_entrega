@@ -31,6 +31,11 @@ public class Main {
         Estado pendiente = new Estado("Orden de Inspección", "Pendiente de Realizacion");
         Estado cerrada = new Estado("Orden de Inspección", "Cerrada");
 
+        Estado fueraServicio = new Estado("Sismografo", "Fuera De Servicio");
+        Estado enLinea = new Estado("Sismografo", "En Linea");
+        Estado fueraDeLinea = new Estado("Sismografo", "Fuera De Linea");
+        List<Estado> estados = Arrays.asList(estadoCompletamenteRealizada,pendiente, cerrada, fueraServicio, enLinea, fueraDeLinea);
+
         // Crear estaciones.
         EstacionSismologica estacion1 = new EstacionSismologica(101, "Estación Centro");
         EstacionSismologica estacion2 = new EstacionSismologica(102, "Estación Norte");
@@ -75,11 +80,10 @@ public class Main {
         motivoTipos.add(new MotivoTipo("Actualización de software"));
 
         // Crear el gestor
-        GestorCierreDeInspeccion gestor = new GestorCierreDeInspeccion(empleados, sesionActiva, ordenes, motivoTipos);
+        GestorCierreDeInspeccion gestor = new GestorCierreDeInspeccion(empleados, sesionActiva, ordenes, motivoTipos, estados);
 
         gestor.buscarOrdenes();
         gestor.ordenarPorFecha();
-        gestor.buscarEstadoCierre();
 
         // GUI
         SwingUtilities.invokeLater(() -> {

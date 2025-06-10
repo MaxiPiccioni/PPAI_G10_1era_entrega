@@ -65,9 +65,9 @@ public class OrdenDeInspeccion {
         return this.estado = estado;
     }
 
-    public void cerrar() {
+    public void cerrar(Estado estado, LocalDateTime fechaHoraCierre) {
         setEstado(estado);
-        setFechaHoraCierre(LocalDateTime.now());
+        setFechaHoraCierre(fechaHoraCierre);
     }
 
 

@@ -16,9 +16,10 @@ public class GestorCierreDeInspeccion {
     private Map<MotivoTipo, String> comentariosPorMotivo;
     private boolean confirmacionCierre;
     private Estado estadoCierre;
+    private List<Estado> estados;
 
 
-    public GestorCierreDeInspeccion(List<Empleado> empleados, Sesion sesion, List<OrdenDeInspeccion> ordenes, List<MotivoTipo> motivoTipos ) {
+    public GestorCierreDeInspeccion(List<Empleado> empleados, Sesion sesion, List<OrdenDeInspeccion> ordenes, List<MotivoTipo> motivoTipos, List<Estado> estados ) {
         this.empleados = empleados;
         this.sesion = sesion;
         this.ordenes = ordenes;
@@ -27,6 +28,7 @@ public class GestorCierreDeInspeccion {
         this.motivosTipo = motivoTipos;
         this.motivosSeleccionados = new ArrayList<>();
         this.comentariosPorMotivo = new HashMap<>();
+        this.estados = estados;
     }
 
     public Empleado buscarEmpleado() {
@@ -99,6 +101,12 @@ public class GestorCierreDeInspeccion {
 
     public void tomarConfirmacionCierre(boolean confirmacion) {
         this.confirmacionCierre = confirmacion;
+        Estado estadoCerrada = buscarEstadoCierre();
+        LocalDateTime fechaCierre = obtenerFechaHoraActual();
+        this.ordenSeleccionada.cerrar(estadoCerrada, fechaCierre);
+
+        ponerSismografoFueraDeServicio();
+
     }
 
     public boolean validarDatosCierre() {
@@ -113,20 +121,29 @@ public class GestorCierreDeInspeccion {
         return true;
     }
 
-    public void buscarEstadoCierre() {
-       /* boolean encontroAlguna = false;
-
-        for (OrdenDeInspeccion orden : ordenes) {
-            Estado estado = orden.getEstado();
+    public Estado buscarEstadoCierre() {
+        for (Estado estado : estados) {
             if (estado != null && estado.esAmbitoOrdenDeInspeccion() && estado.esCerrada()) {
-                OrdenDeInspeccion ordenACerrar = orden;
+                return estado;
             }
         }
-        obtenerFechaHoraActual(ordenACerrar);
-
+        return null;
     }
-    public LocalDateTime obtenerFechaHoraActual(OrdenDeInspeccion ordenACerrar) {
-       ordenACerrar.cerrar(LocalDateTime.now();
-*/
+
+    public LocalDateTime obtenerFechaHoraActual() {
+       return LocalDateTime.now();
+    }
+
+    public Estado obtenerEstadoFueraDeServicioSismografo() {
+        for (Estado estado : estados) {
+            if (estado != null && estado.esFueraDeServicio() && estado.esAmbitoSismografo()) {
+                return estado;
+            }
+        }
+        return null;
+    }
+
+    public void ponerSismografoFueraDeServicio(){
+        Estado estadoFueraServicio = obtenerEstadoFueraDeServicioSismografo();
     }
 }

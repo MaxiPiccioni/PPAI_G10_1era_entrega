@@ -10,7 +10,7 @@ public class EstacionSismologica {
     private Integer longitud;
     private String nombre;
     private Integer nroCertificacionAdquisicion;
-    private Sismografo sismografo;
+    private Sismografo sismografo; // corregir esto
 
     public EstacionSismologica(int codigoEstacion, String nombre) {
         this.codigoEstacion = codigoEstacion;
