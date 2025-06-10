@@ -1,9 +1,6 @@
 package Clases;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class GestorCierreDeInspeccion {
     private OrdenDeInspeccion ordenSeleccionada;
@@ -14,14 +11,20 @@ public class GestorCierreDeInspeccion {
     private List<OrdenDeInspeccion> ordenes;
     private List<OrdenDeInspeccion> ordenesFiltradas;
     private List<MotivoTipo> motivosTipo;
+    private List<MotivoTipo> motivosSeleccionados;
+    private Map<MotivoTipo, String> comentariosPorMotivo;
 
-    public GestorCierreDeInspeccion(List<Empleado> empleados, Sesion sesion, List<OrdenDeInspeccion> ordenes) {
+
+
+    public GestorCierreDeInspeccion(List<Empleado> empleados, Sesion sesion, List<OrdenDeInspeccion> ordenes, List<MotivoTipo> motivoTipos ) {
         this.empleados = empleados;
         this.sesion = sesion;
         this.ordenes = ordenes;
         this.ordenesFiltradas = new ArrayList<>();
         this.empleadoLogueado = buscarEmpleado();
-        this.motivosTipo = new ArrayList<>();
+        this.motivosTipo = motivoTipos;
+        this.motivosSeleccionados = new ArrayList<>();
+        this.comentariosPorMotivo = new HashMap<>();
     }
 
     public Empleado buscarEmpleado() {
@@ -62,9 +65,39 @@ public class GestorCierreDeInspeccion {
         }
     }
 
+
     public void tomarObservacion(String observacion) {
         ordenSeleccionada.setObservacion(observacion);
     }
+
+    public List<String> buscarTiposMotivo(){
+        List<String> descripciones = new ArrayList<>();
+        for (MotivoTipo motivo : motivosTipo) {
+            descripciones.add(motivo.getDescripcion());
+        }
+        return descripciones;
+    }
+
+    public void tomarTipo(String descripcion) {
+        for (MotivoTipo motivo : motivosTipo) {
+            if (motivo.getDescripcion().equals(descripcion)) {
+                motivosSeleccionados.add(motivo);
+                break;
+            }
+        }
+    }
+
+    public void tomarIngresoComentario(String descripcion, String comentario) {
+        for (MotivoTipo motivo : motivosSeleccionados) {
+            if (motivo.getDescripcion().equals(descripcion)) {
+                comentariosPorMotivo.put(motivo, comentario);
+                break;
+            }
+        }
+    }
+
+
+
 
 
 

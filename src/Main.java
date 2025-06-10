@@ -67,14 +67,14 @@ public class Main {
         List<OrdenDeInspeccion> ordenes = Arrays.asList(orden1, orden2, orden3);
 
         // Tipos de motivo para Fuera de Servicio.
-        List<MotivoTipo> motivosFueraServicio = new ArrayList<>();
-        motivosFueraServicio.add(new MotivoTipo("Mantenimiento"));
-        motivosFueraServicio.add(new MotivoTipo("Falla técnica"));
-        motivosFueraServicio.add(new MotivoTipo("Actualización de software"));
-        motivosFueraServicio.add(new MotivoTipo("Inspección periódica"));
+        List<MotivoTipo> motivoTipos = new ArrayList<>();
+        motivoTipos.add(new MotivoTipo("Mantenimiento"));
+        motivoTipos.add(new MotivoTipo("Falla técnica"));
+        motivoTipos.add(new MotivoTipo("Inspección periódica"));
+        motivoTipos.add(new MotivoTipo("Actualización de software"));
 
         // Crear el gestor
-        GestorCierreDeInspeccion gestor = new GestorCierreDeInspeccion(empleados, sesionActiva, ordenes);
+        GestorCierreDeInspeccion gestor = new GestorCierreDeInspeccion(empleados, sesionActiva, ordenes, motivoTipos);
 
         gestor.buscarOrdenes();
         gestor.ordenarPorFecha();

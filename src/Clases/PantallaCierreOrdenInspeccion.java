@@ -5,12 +5,19 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PantallaCierreOrdenInspeccion extends JFrame {
     private JPanel panelPrincipal;
     private JButton botonCerrarOrden;
     private GestorCierreDeInspeccion gestor;
+    private List<JCheckBox> checkboxesMotivo = new ArrayList<>();
+    private Map<JCheckBox, JTextArea> comentariosPorCheckbox = new HashMap<>();
+    private JPanel panelMotivos; // contenedor visual para mostrar t0do
+
 
     public PantallaCierreOrdenInspeccion(GestorCierreDeInspeccion gestor) {
         this.gestor = gestor;
@@ -113,7 +120,9 @@ public class PantallaCierreOrdenInspeccion extends JFrame {
                             try {
                                 int numeroOrden = Integer.parseInt(numeroOrdenObj.toString());
                                 gestor.tomarSeleccionOrden(numeroOrden);
-                                pedirObservacion();
+                                pedirObservacion((JFrame) SwingUtilities.getWindowAncestor(tabla));
+
+
                             } catch (NumberFormatException ex) {
                             }
                         }
@@ -123,7 +132,9 @@ public class PantallaCierreOrdenInspeccion extends JFrame {
         });
     }
 
-    public void pedirObservacion() {
+    public void pedirObservacion(JFrame ventanaAnterior) {
+        ventanaAnterior.dispose(); // Cierra la ventana anterior
+
         JFrame ventanaObservacion = new JFrame("Gestor de Cierre de Órdenes de Inspección");
         ventanaObservacion.setSize(600, 300);
         ventanaObservacion.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -150,6 +161,7 @@ public class PantallaCierreOrdenInspeccion extends JFrame {
             if (!observacion.isEmpty()) {
                 tomarObservacion(observacion);
                 ventanaObservacion.dispose();
+                pedirTipos(); // se muestra después de cerrar la anterior
             } else {
                 JOptionPane.showMessageDialog(ventanaObservacion, "Debe ingresar una observación.", "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -163,8 +175,133 @@ public class PantallaCierreOrdenInspeccion extends JFrame {
         ventanaObservacion.setVisible(true);
     }
 
+
     public void tomarObservacion(String observacion) {
         gestor.tomarObservacion(observacion);
     }
+
+    public void pedirTipos(){
+        dispose();
+        List<String> motivosTipo= gestor.buscarTiposMotivo(); // ya funciona
+        tomarTipos(motivosTipo);
+    }
+
+
+
+
+    private void tomarTipos(List<String> motivosTipo) {
+
+
+        checkboxesMotivo = new ArrayList<>();
+        comentariosPorCheckbox = new HashMap<>();
+
+        panelMotivos = new JPanel();
+        panelMotivos.setLayout(new BoxLayout(panelMotivos, BoxLayout.Y_AXIS));
+        panelMotivos.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        for (String descripcion : motivosTipo) {
+            JCheckBox chk = new JCheckBox(descripcion);
+            chk.setFont(new Font("Arial", Font.BOLD, 14));
+
+            JTextArea txtComentario = new JTextArea(2, 30);
+            txtComentario.setFont(new Font("Arial", Font.PLAIN, 13));
+            txtComentario.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+
+            checkboxesMotivo.add(chk);
+            comentariosPorCheckbox.put(chk, txtComentario);
+
+            JPanel fila = new JPanel(new BorderLayout(5, 5));
+            fila.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+            fila.add(chk, BorderLayout.NORTH);
+            fila.add(new JScrollPane(txtComentario), BorderLayout.CENTER);
+
+            panelMotivos.add(fila);
+        }
+
+
+        JButton btnConfirmar = new JButton("Confirmar");
+        btnConfirmar.setFont(new Font("Arial", Font.BOLD, 14));
+        btnConfirmar.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnConfirmar.addActionListener(e -> tomarIngresoComentario());
+
+        panelMotivos.add(Box.createRigidArea(new Dimension(0, 10)));
+        panelMotivos.add(btnConfirmar);
+
+
+        JFrame frame = new JFrame("Gestor de Cierre de Órdenes de Inspección");
+        frame.setSize(600, 400);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        JLabel titulo = new JLabel("Gestor de Cierre de Órdenes de Inspección", SwingConstants.CENTER);
+        titulo.setFont(new Font("Arial", Font.BOLD, 20));
+        titulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(titulo);
+
+        JLabel subtitulo = new JLabel("Seleccione los motivos y agregue una observación si corresponde", SwingConstants.CENTER);
+        subtitulo.setFont(new Font("Arial", Font.BOLD, 16));
+        subtitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(subtitulo);
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
+
+        panel.add(panelMotivos);
+
+        frame.setContentPane(panel);
+        frame.pack();
+        frame.setVisible(true);
+
+    }
+
+    private void tomarIngresoComentario() {
+        boolean seSeleccionoAlMenosUno = false;
+
+        for (JCheckBox chk : checkboxesMotivo) {
+            if (chk.isSelected()) {
+                seSeleccionoAlMenosUno = true;
+                String descripcion = chk.getText();
+                String comentario = comentariosPorCheckbox.get(chk).getText().trim();
+
+                gestor.tomarTipo(descripcion); // reflejo de tomarTipos()
+                gestor.tomarIngresoComentario(descripcion, comentario); // reflejo de tomarIngresoComentario()
+            }
+        }
+
+        if (!seSeleccionoAlMenosUno) {
+            JOptionPane.showMessageDialog(null, "Debe seleccionar al menos un motivo.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        pedirConfirmacionCierre();
+    }
+
+
+
+
+    private void pedirConfirmacionCierre() {
+        // Podés mostrar una ventana de confirmación, por ahora dejá algo simple
+        int confirm = JOptionPane.showConfirmDialog(null, "¿Confirmar cierre?", "Confirmación", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            tomarConfirmacionCierre();
+        }
+    }
+
+    private void tomarConfirmacionCierre() {
+        // seguir al paso 7
+
+    }
+
+
+
+
+
+
+
+
+
+
 
 }
