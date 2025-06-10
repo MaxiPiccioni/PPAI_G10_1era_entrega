@@ -7,7 +7,7 @@ public class OrdenDeInspeccion {
     private LocalDateTime fechaHoraFinalizacion;
     private LocalDateTime fechaHoraInicio;
     private Integer numeroOrden;
-    private String observacionCierre;
+    public String observacionCierre;
     private Estado estado;
     private Empleado empleado;
     private EstacionSismologica estacion;
@@ -60,4 +60,15 @@ public class OrdenDeInspeccion {
     public void setFechaHoraCierre(LocalDateTime fechaHoraCierre) {
         this.fechaHoraCierre = fechaHoraCierre;
     }
+
+    public Estado getEstado() {
+        return this.estado = estado;
+    }
+
+    public void cerrar() {
+        setEstado(estado);
+        setFechaHoraCierre(LocalDateTime.now());
+    }
+
+
 }

@@ -1,5 +1,6 @@
 package Clases;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class GestorCierreDeInspeccion {
@@ -13,7 +14,8 @@ public class GestorCierreDeInspeccion {
     private List<MotivoTipo> motivosTipo;
     private List<MotivoTipo> motivosSeleccionados;
     private Map<MotivoTipo, String> comentariosPorMotivo;
-
+    private boolean confirmacionCierre;
+    private Estado estadoCierre;
 
 
     public GestorCierreDeInspeccion(List<Empleado> empleados, Sesion sesion, List<OrdenDeInspeccion> ordenes, List<MotivoTipo> motivoTipos ) {
@@ -65,7 +67,6 @@ public class GestorCierreDeInspeccion {
         }
     }
 
-
     public void tomarObservacion(String observacion) {
         ordenSeleccionada.setObservacion(observacion);
     }
@@ -96,9 +97,36 @@ public class GestorCierreDeInspeccion {
         }
     }
 
+    public void tomarConfirmacionCierre(boolean confirmacion) {
+        this.confirmacionCierre = confirmacion;
+    }
 
+    public boolean validarDatosCierre() {
+        String observacion = ordenSeleccionada.observacionCierre;
+        if (observacion == null || observacion.trim().isEmpty()) {
+            return false;
+        }
 
+        if (motivosSeleccionados == null || motivosSeleccionados.isEmpty()) {
+            return false;
+        }
+        return true;
+    }
 
+    public void buscarEstadoCierre() {
+       /* boolean encontroAlguna = false;
 
+        for (OrdenDeInspeccion orden : ordenes) {
+            Estado estado = orden.getEstado();
+            if (estado != null && estado.esAmbitoOrdenDeInspeccion() && estado.esCerrada()) {
+                OrdenDeInspeccion ordenACerrar = orden;
+            }
+        }
+        obtenerFechaHoraActual(ordenACerrar);
 
+    }
+    public LocalDateTime obtenerFechaHoraActual(OrdenDeInspeccion ordenACerrar) {
+       ordenACerrar.cerrar(LocalDateTime.now();
+*/
+    }
 }

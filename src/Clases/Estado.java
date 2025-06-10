@@ -13,6 +13,14 @@ public class Estado {
         return this.nombreEstado.equalsIgnoreCase("Completamente realizada") && this.ambito.equals("Orden de Inspección");
     }
 
+    public boolean esAmbitoOrdenDeInspeccion() {
+        return this.ambito.equals("Orden de Inspección");
+    }
+
+    public boolean esCerrada() {
+        return nombreEstado.equals("Cerrada");
+    }
+
     public String getNombreEstado() {
         return nombreEstado;
     }

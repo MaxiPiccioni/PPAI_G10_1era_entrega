@@ -29,6 +29,7 @@ public class Main {
         // Crear estado: Estados de órdenes.
         Estado estadoCompletamenteRealizada = new Estado("Orden de Inspección", "Completamente Realizada");
         Estado pendiente = new Estado("Orden de Inspección", "Pendiente de Realizacion");
+        Estado cerrada = new Estado("Orden de Inspección", "Cerrada");
 
         // Crear estaciones.
         EstacionSismologica estacion1 = new EstacionSismologica(101, "Estación Centro");
@@ -78,6 +79,7 @@ public class Main {
 
         gestor.buscarOrdenes();
         gestor.ordenarPorFecha();
+        gestor.buscarEstadoCierre();
 
         // GUI
         SwingUtilities.invokeLater(() -> {
