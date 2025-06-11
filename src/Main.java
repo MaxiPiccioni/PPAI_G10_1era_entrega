@@ -27,14 +27,25 @@ public class Main {
         Sesion sesionActiva = new Sesion(usuarioLogueado);
 
         // Crear estado: Estados de órdenes.
-        Estado estadoCompletamenteRealizada = new Estado("Orden de Inspección", "Completamente Realizada");
+        Estado completamenteRealizada = new Estado("Orden de Inspección", "Completamente Realizada");
         Estado pendiente = new Estado("Orden de Inspección", "Pendiente de Realizacion");
         Estado cerrada = new Estado("Orden de Inspección", "Cerrada");
 
+        // Crear estados Sismografo.
         Estado fueraServicio = new Estado("Sismografo", "Fuera De Servicio");
         Estado enLinea = new Estado("Sismografo", "En Linea");
         Estado fueraDeLinea = new Estado("Sismografo", "Fuera De Linea");
-        List<Estado> estados = Arrays.asList(estadoCompletamenteRealizada,pendiente, cerrada, fueraServicio, enLinea, fueraDeLinea);
+        List<Estado> estados = Arrays.asList(completamenteRealizada, pendiente, cerrada, fueraServicio, enLinea, fueraDeLinea);
+
+        // Crear cambios de estados
+        CambioEstado cambioEstadoCompletamenteRealizada = new CambioEstado(LocalDateTime.now(), null, completamenteRealizada);
+        CambioEstado cambioEstadoPendiente = new CambioEstado(LocalDateTime.now(), null, pendiente);
+        CambioEstado cambioEstadoCerrada = new CambioEstado(LocalDateTime.now(), null, cerrada);
+        CambioEstado cambioEstadoFueraServicio = new CambioEstado(LocalDateTime.now(), null, fueraServicio);
+        CambioEstado cambioEstadoEnLinea = new CambioEstado(LocalDateTime.now(), null, enLinea);
+        CambioEstado cambioEstadoFueraDeLinea = new CambioEstado(LocalDateTime.now(), null, fueraDeLinea);
+
+        List<CambioEstado> cambiosEstados = Arrays.asList(cambioEstadoCompletamenteRealizada, cambioEstadoPendiente, cambioEstadoCerrada, cambioEstadoFueraServicio, cambioEstadoEnLinea, cambioEstadoFueraDeLinea);
 
         // Crear estaciones.
         EstacionSismologica estacion1 = new EstacionSismologica(101, "Estación Centro");
@@ -42,9 +53,9 @@ public class Main {
         EstacionSismologica estacion3 = new EstacionSismologica(103, "Estación Sur");
 
         // Crear sismógrafos y asociarlos a estaciones.
-        Sismografo sismografo1 = new Sismografo(LocalDate.of(2023,1,15), "SIS-001", "SN1001", estacion1);
-        Sismografo sismografo2 = new Sismografo(LocalDate.of(2024,3,10), "SIS-002", "SN1002", estacion2);
-        Sismografo sismografo3 = new Sismografo(LocalDate.of(2022,6,5), "SIS-003", "SN1003", estacion3);
+        Sismografo sismografo1 = new Sismografo(LocalDate.of(2023,1,15), "SIS-001", "SN1001", estacion1, cambiosEstados);
+        Sismografo sismografo2 = new Sismografo(LocalDate.of(2024,3,10), "SIS-002", "SN1002", estacion2, cambiosEstados);
+        Sismografo sismografo3 = new Sismografo(LocalDate.of(2022,6,5), "SIS-003", "SN1003", estacion3, cambiosEstados);
 
         // Asignar sismógrafos a estaciones.
         estacion1.setSismografo(sismografo1);
@@ -56,7 +67,7 @@ public class Main {
                 LocalDateTime.of(2025, 6, 4, 10, 0),
                 LocalDateTime.of(2025, 6, 4, 9, 0),
                 1, "", empleado1, estacion1);
-        orden1.setEstado(estadoCompletamenteRealizada);
+        orden1.setEstado(completamenteRealizada);
 
         OrdenDeInspeccion orden2 = new OrdenDeInspeccion(
                 LocalDateTime.of(2025, 6, 2, 11, 0),
@@ -68,7 +79,7 @@ public class Main {
                 LocalDateTime.of(2025, 6, 3, 12, 0),
                 LocalDateTime.of(2025, 6, 3, 11, 0),
                 3, "", empleado1, estacion3);
-        orden3.setEstado(estadoCompletamenteRealizada);
+        orden3.setEstado(completamenteRealizada);
 
         List<OrdenDeInspeccion> ordenes = Arrays.asList(orden1, orden2, orden3);
 
@@ -91,4 +102,5 @@ public class Main {
             pantalla.setVisible(true);
         });
     }
+
 }

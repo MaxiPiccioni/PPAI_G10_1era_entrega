@@ -1,6 +1,7 @@
 package Clases;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 public class EstacionSismologica {
     private int codigoEstacion;
@@ -10,7 +11,8 @@ public class EstacionSismologica {
     private Integer longitud;
     private String nombre;
     private Integer nroCertificacionAdquisicion;
-    private Sismografo sismografo; // corregir esto asda
+    private Sismografo sismografo;
+    private CambioEstado cambioEstado;
 
     public EstacionSismologica(int codigoEstacion, String nombre) {
         this.codigoEstacion = codigoEstacion;
@@ -25,7 +27,6 @@ public class EstacionSismologica {
         return nombre;
     }
 
-
     public void setSismografo(Sismografo sismografo) {
         this.sismografo = sismografo;
     }
@@ -36,6 +37,12 @@ public class EstacionSismologica {
         }
         return "";
     }
+
+    public void ponerSismografoEnFueraDeServicio(Estado estadoFueraServicio, Map<MotivoTipo, String>comentariosPorMotivo) {
+        sismografo.sismografoEnFueraDeServicio(estadoFueraServicio, comentariosPorMotivo);
+    }
+
+
 
 
 

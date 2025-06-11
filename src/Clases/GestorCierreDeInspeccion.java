@@ -5,7 +5,7 @@ import java.util.*;
 
 public class GestorCierreDeInspeccion {
     private OrdenDeInspeccion ordenSeleccionada;
-    private OrdenDeInspeccion observacionIngresada;
+    private String observacionIngresada;
     private List<Empleado> empleados;
     private Sesion sesion;
     private Empleado empleadoLogueado;
@@ -69,8 +69,9 @@ public class GestorCierreDeInspeccion {
         }
     }
 
+    // REVISAR
     public void tomarObservacion(String observacion) {
-        ordenSeleccionada.setObservacion(observacion);
+        this.observacionIngresada = observacion;
     }
 
     public List<String> buscarTiposMotivo(){
@@ -103,9 +104,9 @@ public class GestorCierreDeInspeccion {
         this.confirmacionCierre = confirmacion;
         Estado estadoCerrada = buscarEstadoCierre();
         LocalDateTime fechaCierre = obtenerFechaHoraActual();
-        this.ordenSeleccionada.cerrar(estadoCerrada, fechaCierre);
+        this.ordenSeleccionada.cerrar(estadoCerrada, fechaCierre, observacionIngresada);
 
-        ponerSismografoFueraDeServicio();
+        ponerSismografoEnFueraDeServicio();
 
     }
 
@@ -114,7 +115,6 @@ public class GestorCierreDeInspeccion {
         if (observacion == null || observacion.trim().isEmpty()) {
             return false;
         }
-
         if (motivosSeleccionados == null || motivosSeleccionados.isEmpty()) {
             return false;
         }
@@ -143,7 +143,9 @@ public class GestorCierreDeInspeccion {
         return null;
     }
 
-    public void ponerSismografoFueraDeServicio(){
+    public void ponerSismografoEnFueraDeServicio(){
         Estado estadoFueraServicio = obtenerEstadoFueraDeServicioSismografo();
+        EstacionSismologica estacion = ordenSeleccionada.getEstacion();
+        estacion.ponerSismografoEnFueraDeServicio(estadoFueraServicio, comentariosPorMotivo);
     }
 }

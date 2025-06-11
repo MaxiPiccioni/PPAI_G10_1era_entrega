@@ -19,7 +19,7 @@ public class Empleado {
         return nombre;
     }
 
-    public Rol getRol() {
+    public Rol getRol() { // INCONSISTENCIA!!!!!
         return rol;
     }
 

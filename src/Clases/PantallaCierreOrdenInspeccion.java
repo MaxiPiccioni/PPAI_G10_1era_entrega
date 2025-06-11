@@ -242,13 +242,22 @@ public class PantallaCierreOrdenInspeccion extends JFrame {
     }
 
     private void tomarIngresoComentario() {
-        boolean seSeleccionoAlMenosUno = false;
 
         for (JCheckBox chk : checkboxesMotivo) {
             if (chk.isSelected()) {
 
                 String descripcion = chk.getText();
                 String comentario = comentariosPorCheckbox.get(chk).getText().trim();
+                /*
+                if (comentario.isEmpty()) {
+                    JOptionPane.showMessageDialog(
+                            null,
+                            "Debe ingresar un comentario para el motivo seleccionado: \"" + descripcion + "\".",
+                            "Comentario obligatorio",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }*/
 
                 gestor.tomarTipo(descripcion);
                 gestor.tomarIngresoComentario(descripcion, comentario);

@@ -61,12 +61,17 @@ public class OrdenDeInspeccion {
         this.fechaHoraCierre = fechaHoraCierre;
     }
 
+    public EstacionSismologica getEstacion() {
+        return estacion;
+    }
+
     public Estado getEstado() {
         return this.estado = estado;
     }
 
-    public void cerrar(Estado estado, LocalDateTime fechaHoraCierre) {
+    public void cerrar(Estado estado, LocalDateTime fechaHoraCierre, String observacionCierre) {
         setEstado(estado);
+        setObservacion(observacionCierre);
         setFechaHoraCierre(fechaHoraCierre);
     }
 

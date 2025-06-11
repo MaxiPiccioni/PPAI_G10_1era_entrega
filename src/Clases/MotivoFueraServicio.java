@@ -8,4 +8,5 @@ public class MotivoFueraServicio {
         this.comentario = comentario;
         this.motivoTipo = motivoTipo;
     }
+
 }
