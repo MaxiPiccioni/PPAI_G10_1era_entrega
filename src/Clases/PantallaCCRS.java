@@ -9,11 +9,11 @@ import java.util.List;
 public class PantallaCCRS {
 
     public static void mostrarEnPantalla(
-            List<String> emailsResponsables,
             String identificadorSismografo,
             String estado,
             LocalDateTime fechaHora,
-            List<String> motivosYComentarios
+            List<String> motivosYComentarios,
+            String tituloPantalla
     ) {
         StringBuilder mensaje = new StringBuilder();
         mensaje.append("Visualización para el Centro de Coordinación de la Red Sísmica\n\n");
@@ -37,6 +37,7 @@ public class PantallaCCRS {
         JScrollPane scrollPane = new JScrollPane(textArea);
         scrollPane.setPreferredSize(new Dimension(500, 300));
 
-        JOptionPane.showMessageDialog(null, scrollPane, "Pantalla CCRS", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(null, scrollPane, tituloPantalla, JOptionPane.INFORMATION_MESSAGE);
     }
+
 }

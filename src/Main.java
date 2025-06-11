@@ -103,5 +103,4 @@ public class Main {
             pantalla.setVisible(true);
         });
     }
-
 }

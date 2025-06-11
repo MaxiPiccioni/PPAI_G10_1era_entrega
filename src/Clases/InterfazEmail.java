@@ -29,7 +29,6 @@ public class InterfazEmail {
         mensaje.append("Fecha y hora de registro del nuevo estado: ")
                 .append(fechaFormateada).append("\n\n");
 
-
         mensaje.append("Motivos y comentarios asociados:\n");
         for (String linea : motivosYComentarios) {
             mensaje.append("- ").append(linea).append("\n");
@@ -40,7 +39,6 @@ public class InterfazEmail {
         textArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
         JScrollPane scrollPane = new JScrollPane(textArea);
         scrollPane.setPreferredSize(new Dimension(500, 300));
-
 
         JOptionPane.showMessageDialog(null, scrollPane, "Simulación de envío de Mail", JOptionPane.INFORMATION_MESSAGE);
     }

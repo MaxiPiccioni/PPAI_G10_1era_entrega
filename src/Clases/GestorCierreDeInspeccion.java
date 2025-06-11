@@ -22,7 +22,7 @@ public class GestorCierreDeInspeccion {
     private Estado estadoFueraServicio;
 
 
-    public GestorCierreDeInspeccion(List<Empleado> empleados, Sesion sesion, List<OrdenDeInspeccion> ordenes, List<MotivoTipo> motivoTipos, List<Estado> estados ) {
+    public GestorCierreDeInspeccion(List<Empleado> empleados, Sesion sesion, List<OrdenDeInspeccion> ordenes, List<MotivoTipo> motivoTipos, List<Estado> estados) {
         this.empleados = empleados;
         this.sesion = sesion;
         this.ordenes = ordenes;
@@ -53,7 +53,7 @@ public class GestorCierreDeInspeccion {
                 ordenesFiltradas.add(orden);
             }
         }
-        if (ordenesFiltradas.isEmpty()) { //AGREGAR A LA PANTALLA ESA VERIFICACION.
+        if (ordenesFiltradas.isEmpty()) {
             System.out.println("No se encontraron órdenes completamente realizadas para el Responsable de Inspección logueado.");
         }
     }
@@ -170,6 +170,7 @@ public class GestorCierreDeInspeccion {
         String idSismografo = sismografo.getIdentificadorSismografo();
         String nombreEstado = nuevoCambio.getEstado().getNombre();
         LocalDateTime fechaHoraInicio = nuevoCambio.getFechaHoraInicio();
+
         List<String> resumenMotivos = new ArrayList<>();
         for (MotivoFueraServicio motivo : nuevoCambio.getMotivosFueraDeServicio()) {
             String linea = motivo.getMotivoTipo().getDescripcion() + ": " + motivo.getComentario();
@@ -181,8 +182,9 @@ public class GestorCierreDeInspeccion {
         }).start();
 
         new Thread(() -> {
-            PantallaCCRS.mostrarEnPantalla(emailsResponsables, idSismografo, nombreEstado, fechaHoraInicio, resumenMotivos);
+            PantallaCCRS.mostrarEnPantalla(idSismografo, nombreEstado, fechaHoraInicio, resumenMotivos, "Pantalla CCRS - Sala Norte");
+            PantallaCCRS.mostrarEnPantalla(idSismografo, nombreEstado, fechaHoraInicio, resumenMotivos, "Pantalla CCRS - Sala Sur");
         }).start();
-    }
 
+    }
 }
