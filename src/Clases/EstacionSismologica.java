@@ -38,10 +38,13 @@ public class EstacionSismologica {
         return "";
     }
 
+    public Sismografo getSismografo() {
+        return sismografo;
+    }
+
     public void ponerSismografoEnFueraDeServicio(Estado estadoFueraServicio, Map<MotivoTipo, String>comentariosPorMotivo) {
         sismografo.sismografoEnFueraDeServicio(estadoFueraServicio, comentariosPorMotivo);
     }
-
 
 
 

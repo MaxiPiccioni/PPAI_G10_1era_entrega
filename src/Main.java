@@ -11,14 +11,15 @@ public class Main {
     public static void main(String[] args) {
         // Crear roles
         Rol rolRI = new Rol("Responsable de Inspección");
-        Rol rolAyudante = new Rol("Ayudante");
+        Rol rolRR = new Rol("Responsable de Reparación");
 
         // Crear empleados
         Empleado empleado1 = new Empleado("Juan", "Pérez", "3513123430", "juan@frcsistemas.com", rolRI);
         Empleado empleado2 = new Empleado("Ana", "Gómez", "35431242443", "ana@frcsistemas.com", rolRI);
-        Empleado empleado3 = new Empleado("Luis", "López", "3513489767", "luis@frcsistemas.com", rolAyudante);
+        Empleado empleado3 = new Empleado("Luis", "López", "3513489767", "luis@frcsistemas.com", rolRR);
+        Empleado empleado4 = new Empleado("Jorge", "Gomez", "2644575621", "jorge@frcsistemas.com", rolRR);
 
-        List<Empleado> empleados = Arrays.asList(empleado1, empleado2, empleado3);
+        List<Empleado> empleados = Arrays.asList(empleado1, empleado2, empleado3, empleado4);
 
         // Usuario logueado.
         Usuario usuarioLogueado = new Usuario("juan123", "clave123", empleado1);

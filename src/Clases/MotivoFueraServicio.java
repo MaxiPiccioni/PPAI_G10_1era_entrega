@@ -9,4 +9,12 @@ public class MotivoFueraServicio {
         this.motivoTipo = motivoTipo;
     }
 
+    public String getComentario() {
+        return comentario;
+    }
+
+    public MotivoTipo getMotivoTipo() {
+        return motivoTipo;
+    }
+
 }

@@ -192,6 +192,11 @@ public class PantallaCierreOrdenInspeccion extends JFrame {
             JTextArea txtComentario = new JTextArea(2, 30);
             txtComentario.setFont(new Font("Arial", Font.PLAIN, 13));
             txtComentario.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+            txtComentario.setEnabled(false);
+
+            chk.addActionListener(e -> {
+                txtComentario.setEnabled(chk.isSelected());
+            });
 
             checkboxesMotivo.add(chk);
             comentariosPorCheckbox.put(chk, txtComentario);
@@ -283,24 +288,19 @@ public class PantallaCierreOrdenInspeccion extends JFrame {
             return;
         }
 
-        gestor.tomarConfirmacionCierre(true);
-
         JOptionPane.showMessageDialog(null,
                 "La orden fue cerrada correctamente.",
                 "Éxito",
                 JOptionPane.INFORMATION_MESSAGE);
 
-        System.exit(0);
+        // Cierra solo esta ventana
+        Window ventanaActual = SwingUtilities.getWindowAncestor(panelMotivos);
+        if (ventanaActual != null) {
+            ventanaActual.dispose();
+        }
+
+        gestor.tomarConfirmacionCierre(true);
     }
-
-
-
-
-
-
-
-
-
 
 
 }

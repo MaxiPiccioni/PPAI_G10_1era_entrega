@@ -25,8 +25,17 @@ public class CambioEstado {
     public boolean esEstadoActual(Estado estado) {
         return this.estado != null && this.estado.equals(estado);
     }
+
     public void finalizar() {
         this.fechaHoraFin = LocalDateTime.now();
+    }
+
+    public LocalDateTime getFechaHoraInicio() {
+        return fechaHoraInicio;
+    }
+
+    public List<MotivoFueraServicio> getMotivosFueraDeServicio() {
+        return motivosFueraDeServicio;
     }
 
     public void crearMotivoFueraDeServicio(Map<MotivoTipo, String> comentarios) {

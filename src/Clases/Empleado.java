@@ -23,9 +23,14 @@ public class Empleado {
         return rol;
     }
 
-    public String obtenerEmail() {
-        return email;
+    public boolean esResponsableDeReparacion() {
+        return rol != null && rol.esResponsableDeReparacion();
     }
+
+    public String obtenerEmail() {
+        return this.email;
+    }
+
 
 
 }

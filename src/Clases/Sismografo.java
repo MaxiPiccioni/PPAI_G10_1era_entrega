@@ -1,6 +1,7 @@
 package Clases;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,7 @@ public class Sismografo {
         this.nroSerie = nroSerie;
         this.cambiosEstado = cambioEstado;
         this.estacionSismologica = estacionSismologica;
+        this.cambiosEstado = new ArrayList<>();
     }
 
     public String getIdentificadorSismografo() {
@@ -42,6 +44,7 @@ public class Sismografo {
         return null;
     }
 
+
     public void crearNuevoCambioDeEstado(Estado estadoFueraServicio,Map<MotivoTipo, String> comentariosPorMotivo) {
         CambioEstado nuevoEstado = new CambioEstado(
                 LocalDateTime.now(),
@@ -49,9 +52,14 @@ public class Sismografo {
                 estadoFueraServicio
         );
         nuevoEstado.crearMotivoFueraDeServicio(comentariosPorMotivo);
-
         cambiosEstado.add(nuevoEstado);
 
     }
+
+    public CambioEstado obtenerUltimoCambioDeEstado() {
+        if (cambiosEstado.isEmpty()) return null;
+        return cambiosEstado.get(cambiosEstado.size() - 1);
+    }
+
 
 }

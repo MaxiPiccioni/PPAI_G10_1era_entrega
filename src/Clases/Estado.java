@@ -30,7 +30,7 @@ public class Estado {
         return nombreEstado.equals("Fuera De Servicio");
     }
 
-    public String getNombreEstado() {
+    public String getNombre() {
         return nombreEstado;
     }
 

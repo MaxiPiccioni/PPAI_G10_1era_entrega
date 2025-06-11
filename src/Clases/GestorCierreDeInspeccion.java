@@ -17,6 +17,9 @@ public class GestorCierreDeInspeccion {
     private boolean confirmacionCierre;
     private Estado estadoCierre;
     private List<Estado> estados;
+    private List<String> emailsResponsables = new ArrayList<>();
+    private EstacionSismologica estacion;
+    private Estado estadoFueraServicio;
 
 
     public GestorCierreDeInspeccion(List<Empleado> empleados, Sesion sesion, List<OrdenDeInspeccion> ordenes, List<MotivoTipo> motivoTipos, List<Estado> estados ) {
@@ -112,7 +115,7 @@ public class GestorCierreDeInspeccion {
 
     public boolean validarDatosCierre() {
         String observacion = ordenSeleccionada.observacionCierre;
-        if (observacion == null || observacion.trim().isEmpty()) {
+        if (observacionIngresada == null || observacionIngresada.trim().isEmpty()) {
             return false;
         }
         if (motivosSeleccionados == null || motivosSeleccionados.isEmpty()) {
@@ -144,8 +147,42 @@ public class GestorCierreDeInspeccion {
     }
 
     public void ponerSismografoEnFueraDeServicio(){
-        Estado estadoFueraServicio = obtenerEstadoFueraDeServicioSismografo();
-        EstacionSismologica estacion = ordenSeleccionada.getEstacion();
+        estadoFueraServicio = obtenerEstadoFueraDeServicioSismografo();
+        estacion = ordenSeleccionada.getEstacion();
         estacion.ponerSismografoEnFueraDeServicio(estadoFueraServicio, comentariosPorMotivo);
+        obtenerResponsableDeReparacion();
     }
+
+    public void obtenerResponsableDeReparacion() {
+        for (Empleado empleado : empleados) {
+            if (empleado.esResponsableDeReparacion()) {
+                emailsResponsables.add(empleado.obtenerEmail());
+            }
+        }
+
+        notificarCierre( );
+    }
+
+    public void notificarCierre() {
+        Sismografo sismografo = estacion.getSismografo();
+        CambioEstado nuevoCambio = sismografo.obtenerUltimoCambioDeEstado();
+
+        String idSismografo = sismografo.getIdentificadorSismografo();
+        String nombreEstado = nuevoCambio.getEstado().getNombre();
+        LocalDateTime fechaHoraInicio = nuevoCambio.getFechaHoraInicio();
+        List<String> resumenMotivos = new ArrayList<>();
+        for (MotivoFueraServicio motivo : nuevoCambio.getMotivosFueraDeServicio()) {
+            String linea = motivo.getMotivoTipo().getDescripcion() + ": " + motivo.getComentario();
+            resumenMotivos.add(linea);
+        }
+
+        new Thread(() -> {
+            InterfazEmail.notificarCierre(emailsResponsables, idSismografo, nombreEstado, fechaHoraInicio, resumenMotivos);
+        }).start();
+
+        new Thread(() -> {
+            PantallaCCRS.mostrarEnPantalla(emailsResponsables, idSismografo, nombreEstado, fechaHoraInicio, resumenMotivos);
+        }).start();
+    }
+
 }
