@@ -195,8 +195,9 @@ public class GestorCierreDeInspeccion {
     }
 
     public void finCU(){
-
+        System.out.println("Fin Caso de uso con éxito.");
     }
+
 
     public Estado obtenerEstadoEnLineaSismografo() {
         for (Estado estado : estados) {

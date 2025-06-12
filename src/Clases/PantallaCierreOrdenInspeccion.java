@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 public class PantallaCierreOrdenInspeccion extends JFrame {
     private JPanel panelPrincipal;
     private JButton botonCerrarOrden;

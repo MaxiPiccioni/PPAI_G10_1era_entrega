@@ -69,7 +69,6 @@ public class Sismografo {
         nuevoEstado.crearMotivoFueraDeServicio(comentariosPorMotivo);
         setEstadoActual(estadoFueraServicio);
         cambiosEstado.add(nuevoEstado);
-
     }
 
 
