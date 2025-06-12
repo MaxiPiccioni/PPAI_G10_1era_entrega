@@ -110,6 +110,7 @@ public class Main {
         // GUI
         SwingUtilities.invokeLater(() -> {
             PantallaCierreOrdenInspeccion pantalla = new PantallaCierreOrdenInspeccion(gestor);
+            pantalla.seleccionarCierreOrden();
             pantalla.setVisible(true);
         });
     }

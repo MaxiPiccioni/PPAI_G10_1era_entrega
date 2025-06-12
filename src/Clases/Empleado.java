@@ -27,7 +27,7 @@ public class Empleado {
     }
 
 
-    public Rol getRol() { // INCONSISTENCIA!!!!!
+    public Rol getRol() {
         return rol;
     }
 

@@ -25,10 +25,13 @@ public class PantallaCierreOrdenInspeccion extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         this.gestor = gestor;
-
-        habilitarPantalla();
-
     }
+
+
+    public void seleccionarCierreOrden(){
+        habilitarPantalla();
+    }
+
 
     private void habilitarPantalla() {
         panelPrincipal = new JPanel(new BorderLayout());
@@ -179,6 +182,7 @@ public class PantallaCierreOrdenInspeccion extends JFrame {
         ventanaObservacion.setVisible(true);
     }
 
+
     public void tomarObservacion(String observacion) {
         gestor.tomarObservacion(observacion);
     }
@@ -228,8 +232,19 @@ public class PantallaCierreOrdenInspeccion extends JFrame {
         btnConfirmar.setAlignmentX(Component.CENTER_ALIGNMENT);
         btnConfirmar.addActionListener(e -> tomarIngresoComentario());
 
+        JButton btnEnLinea = new JButton("Poner sismógrafo en línea");
+        btnEnLinea.setFont(new Font("Arial", Font.BOLD, 14));
+        btnEnLinea.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnEnLinea.addActionListener(e -> mostrarMensajeSismografoEnLinea());
+
+
+
         panelMotivos.add(Box.createRigidArea(new Dimension(0, 10)));
         panelMotivos.add(btnConfirmar);
+
+        panelMotivos.add(Box.createRigidArea(new Dimension(0, 10)));
+        panelMotivos.add(btnEnLinea);
+
 
 
         JFrame panelMotivosYComentarios = new JFrame("Gestor de Cierre de Órdenes de Inspección");
@@ -257,8 +272,8 @@ public class PantallaCierreOrdenInspeccion extends JFrame {
         panelMotivosYComentarios.setContentPane(panel);
         panelMotivosYComentarios.pack();
         panelMotivosYComentarios.setVisible(true);
-
     }
+
 
     private void tomarIngresoComentario() {
         for (JCheckBox chk : checkboxesMotivo) {
@@ -280,6 +295,14 @@ public class PantallaCierreOrdenInspeccion extends JFrame {
         if (confirm == JOptionPane.YES_OPTION) {
             tomarConfirmacionCierre();
         }
+        if (confirm == JOptionPane.NO_OPTION) {
+            System.exit(0);
+        }
+
+        JButton btnEnLinea = new JButton("Poner sismografo en línea");
+        btnEnLinea.setFont(new Font("Arial", Font.BOLD, 14));
+        btnEnLinea.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnEnLinea.addActionListener(e -> gestor.ponerSismografoEnLinea());
     }
 
 
@@ -301,6 +324,23 @@ public class PantallaCierreOrdenInspeccion extends JFrame {
         if (ventanaActual != null) {
             ventanaActual.dispose();
         }
-        gestor.tomarConfirmacionCierre(true);
+        gestor.tomarConfirmacionCierre();
     }
+
+
+    public void mostrarMensajeSismografoEnLinea() {
+        gestor.ponerSismografoEnLinea();
+
+        JOptionPane.showMessageDialog(
+                null,
+                "El sismógrafo ha sido puesto en estado 'En Línea'.",
+                "Estado actualizado",
+                JOptionPane.INFORMATION_MESSAGE
+        );
+
+        for (Window window : Window.getWindows()) {
+            window.dispose();
+        }
+    }
+
 }

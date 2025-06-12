@@ -45,6 +45,11 @@ public class Sismografo {
     }
 
 
+    public void sismografoEnLinea(Estado estadoEnLinea) {
+        setEstadoActual(estadoEnLinea);
+    }
+
+
     public CambioEstado obtenerCambioEstadoActual() {
         for (CambioEstado cambioEstado : cambiosEstado) {
             if (cambioEstado.esEstadoActual(cambioEstado.getEstado())) {

@@ -35,6 +35,11 @@ public class Estado {
     }
 
 
+    public boolean esEnLinea() {
+        return nombreEstado.equals("en Línea");
+    }
+
+
     public String getNombre() {
         return nombreEstado;
     }

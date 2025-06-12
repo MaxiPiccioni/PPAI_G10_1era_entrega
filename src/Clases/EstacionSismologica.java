@@ -109,4 +109,8 @@ public class EstacionSismologica {
     public void setCambiosEstado(List<CambioEstado> cambiosEstado) {
         this.cambiosEstado = cambiosEstado;
     }
+
+    public void ponerSismografoEnLinea(Estado estadoEnLinea) {
+        sismografo.sismografoEnLinea(estadoEnLinea);
+    }
 }

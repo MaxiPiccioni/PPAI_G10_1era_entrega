@@ -14,11 +14,9 @@ public class GestorCierreDeInspeccion {
     private List<MotivoTipo> motivosTipo;
     private List<MotivoTipo> motivosSeleccionados;
     private Map<MotivoTipo, String> comentariosPorMotivo;
-    private boolean confirmacionCierre;
-    private Estado estadoCierre;
     private List<Estado> estados;
     private List<String> emailsResponsables = new ArrayList<>();
-    private EstacionSismologica estacion;
+    private EstacionSismologica estacionSismologica;
     private Estado estadoFueraServicio;
 
 
@@ -105,8 +103,7 @@ public class GestorCierreDeInspeccion {
     }
 
 
-    public void tomarConfirmacionCierre(boolean confirmacion) {
-        this.confirmacionCierre = confirmacion;
+    public void tomarConfirmacionCierre() {
         Estado estadoCerrada = buscarEstadoCierre();
         LocalDateTime fechaCierre = obtenerFechaHoraActual();
         this.ordenSeleccionada.cerrar(estadoCerrada, fechaCierre, observacionIngresada);
@@ -115,11 +112,12 @@ public class GestorCierreDeInspeccion {
 
     }
 
+
     public boolean validarDatosCierre() {
-        String observacion = ordenSeleccionada.observacionCierre;
         if (observacionIngresada == null || observacionIngresada.trim().isEmpty()) {
             return false;
         }
+
         if (motivosSeleccionados == null || motivosSeleccionados.isEmpty()) {
             return false;
         }
@@ -154,8 +152,8 @@ public class GestorCierreDeInspeccion {
 
     public void ponerSismografoEnFueraDeServicio(){
         estadoFueraServicio = obtenerEstadoFueraDeServicioSismografo();
-        estacion = ordenSeleccionada.getEstacion();
-        estacion.ponerSismografoEnFueraDeServicio(estadoFueraServicio, comentariosPorMotivo);
+        estacionSismologica = ordenSeleccionada.getEstacion();
+        estacionSismologica.ponerSismografoEnFueraDeServicio(estadoFueraServicio, comentariosPorMotivo);
         obtenerResponsableDeReparacion();
     }
 
@@ -171,7 +169,7 @@ public class GestorCierreDeInspeccion {
 
 
     public void notificarCierre() {
-        Sismografo sismografo = estacion.getSismografo();
+        Sismografo sismografo = estacionSismologica.getSismografo();
         CambioEstado nuevoCambio = sismografo.obtenerUltimoCambioDeEstado();
 
         String idSismografo = sismografo.getIdentificadorSismografo();
@@ -197,7 +195,22 @@ public class GestorCierreDeInspeccion {
     }
 
     public void finCU(){
-        //fin
-        System.out.println("GRACIAS POR VER!");
+
+    }
+
+    public Estado obtenerEstadoEnLineaSismografo() {
+        for (Estado estado : estados) {
+            if (estado != null && estado.esEnLinea() && estado.esAmbitoSismografo()) {
+                return estado;
+            }
+        }
+        return null;
+    }
+
+
+    public void ponerSismografoEnLinea(){
+        Estado estadoEnLinea = obtenerEstadoEnLineaSismografo();
+        estacionSismologica = ordenSeleccionada.getEstacion();
+        estacionSismologica.ponerSismografoEnLinea(estadoEnLinea);
     }
 }
