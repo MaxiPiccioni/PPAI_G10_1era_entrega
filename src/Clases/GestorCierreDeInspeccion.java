@@ -27,44 +27,42 @@ public class GestorCierreDeInspeccion {
         this.sesion = sesion;
         this.ordenes = ordenes;
         this.ordenesFiltradas = new ArrayList<>();
-        this.empleadoLogueado = buscarEmpleado();
         this.motivosTipo = motivoTipos;
         this.motivosSeleccionados = new ArrayList<>();
         this.comentariosPorMotivo = new HashMap<>();
         this.estados = estados;
     }
 
-    public Empleado buscarEmpleado() {
-        Usuario usuarioLogueado = sesion.obtenerRILogueado();
-        if (usuarioLogueado != null) {
-            empleadoLogueado = usuarioLogueado.obtenerEmpleado();
-        }
-        return empleadoLogueado;
+    public void nuevoCierre() {
+        buscarEmpleado();
     }
 
-    // Buscar y guardar órdenes que correspondan al RI logueado
-    public void buscarOrdenes() {
+
+    public void buscarEmpleado() {
+        empleadoLogueado = sesion.obtenerRILogueado();
+    }
+
+
+    public boolean buscarOrdenes() {
         ordenesFiltradas.clear();
-        if (empleadoLogueado == null) {
-            return;
-        }
+
         for (OrdenDeInspeccion orden : ordenes) {
             if (orden.esDeRI(empleadoLogueado) && orden.esCompletamenteRealizada()) {
                 ordenesFiltradas.add(orden);
             }
         }
-        if (ordenesFiltradas.isEmpty()) {
-            System.out.println("No se encontraron órdenes completamente realizadas para el Responsable de Inspección logueado.");
-        }
+        return !ordenesFiltradas.isEmpty();
     }
+
 
     public List<OrdenDeInspeccion> ordenarPorFecha() {
         ordenesFiltradas.sort(Comparator.comparing(OrdenDeInspeccion::getFechaHoraFinalizacion));
         return ordenesFiltradas;
     }
 
+
     public void tomarSeleccionOrden(int numeroOrden) {
-        for (OrdenDeInspeccion orden : this.ordenarPorFecha()) {
+        for (OrdenDeInspeccion orden : ordenesFiltradas) {
             if (orden.getNumeroOrden() == numeroOrden) {
                 this.ordenSeleccionada = orden;
                 break;
@@ -72,10 +70,11 @@ public class GestorCierreDeInspeccion {
         }
     }
 
-    // REVISAR
+
     public void tomarObservacion(String observacion) {
         this.observacionIngresada = observacion;
     }
+
 
     public List<String> buscarTiposMotivo(){
         List<String> descripciones = new ArrayList<>();
@@ -84,6 +83,7 @@ public class GestorCierreDeInspeccion {
         }
         return descripciones;
     }
+
 
     public void tomarTipo(String descripcion) {
         for (MotivoTipo motivo : motivosTipo) {
@@ -94,6 +94,7 @@ public class GestorCierreDeInspeccion {
         }
     }
 
+
     public void tomarIngresoComentario(String descripcion, String comentario) {
         for (MotivoTipo motivo : motivosSeleccionados) {
             if (motivo.getDescripcion().equals(descripcion)) {
@@ -102,6 +103,7 @@ public class GestorCierreDeInspeccion {
             }
         }
     }
+
 
     public void tomarConfirmacionCierre(boolean confirmacion) {
         this.confirmacionCierre = confirmacion;
@@ -124,6 +126,7 @@ public class GestorCierreDeInspeccion {
         return true;
     }
 
+
     public Estado buscarEstadoCierre() {
         for (Estado estado : estados) {
             if (estado != null && estado.esAmbitoOrdenDeInspeccion() && estado.esCerrada()) {
@@ -133,9 +136,11 @@ public class GestorCierreDeInspeccion {
         return null;
     }
 
+
     public LocalDateTime obtenerFechaHoraActual() {
        return LocalDateTime.now();
     }
+
 
     public Estado obtenerEstadoFueraDeServicioSismografo() {
         for (Estado estado : estados) {
@@ -146,6 +151,7 @@ public class GestorCierreDeInspeccion {
         return null;
     }
 
+
     public void ponerSismografoEnFueraDeServicio(){
         estadoFueraServicio = obtenerEstadoFueraDeServicioSismografo();
         estacion = ordenSeleccionada.getEstacion();
@@ -153,15 +159,16 @@ public class GestorCierreDeInspeccion {
         obtenerResponsableDeReparacion();
     }
 
+
     public void obtenerResponsableDeReparacion() {
         for (Empleado empleado : empleados) {
             if (empleado.esResponsableDeReparacion()) {
                 emailsResponsables.add(empleado.obtenerEmail());
             }
         }
-
         notificarCierre( );
     }
+
 
     public void notificarCierre() {
         Sismografo sismografo = estacion.getSismografo();
@@ -186,5 +193,11 @@ public class GestorCierreDeInspeccion {
             PantallaCCRS.mostrarEnPantalla(idSismografo, nombreEstado, fechaHoraInicio, resumenMotivos, "Pantalla CCRS - Sala Sur");
         }).start();
 
+        finCU();
+    }
+
+    public void finCU(){
+        //fin
+        System.out.println("GRACIAS POR VER!");
     }
 }

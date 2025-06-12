@@ -34,12 +34,12 @@ public class InterfazEmail {
             mensaje.append("- ").append(linea).append("\n");
         }
 
-        JTextArea textArea = new JTextArea(mensaje.toString());
-        textArea.setEditable(false);
-        textArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
-        JScrollPane scrollPane = new JScrollPane(textArea);
-        scrollPane.setPreferredSize(new Dimension(500, 300));
+        JTextArea areaTexto = new JTextArea(mensaje.toString());
+        areaTexto.setEditable(false);
+        areaTexto.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        JScrollPane panelEmail = new JScrollPane(areaTexto);
+        panelEmail.setPreferredSize(new Dimension(500, 300));
 
-        JOptionPane.showMessageDialog(null, scrollPane, "Simulación de envío de Mail", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(null, panelEmail, "Simulación de envío de Mail", JOptionPane.INFORMATION_MESSAGE);
     }
 }

@@ -31,13 +31,13 @@ public class PantallaCCRS {
             mensaje.append("- ").append(linea).append("\n");
         }
 
-        JTextArea textArea = new JTextArea(mensaje.toString());
-        textArea.setEditable(false);
-        textArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
-        JScrollPane scrollPane = new JScrollPane(textArea);
-        scrollPane.setPreferredSize(new Dimension(500, 300));
+        JTextArea areaTexto = new JTextArea(mensaje.toString());
+        areaTexto.setEditable(false);
+        areaTexto.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        JScrollPane panelPantalla = new JScrollPane(areaTexto);
+        panelPantalla.setPreferredSize(new Dimension(500, 300));
 
-        JOptionPane.showMessageDialog(null, scrollPane, tituloPantalla, JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(null, panelPantalla, tituloPantalla, JOptionPane.INFORMATION_MESSAGE);
     }
 
 }
