@@ -3,6 +3,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class CambioEstado {
     private LocalDateTime fechaHoraInicio;
@@ -11,13 +12,49 @@ public class CambioEstado {
     private Empleado responsableInspeccion;
     private List<MotivoFueraServicio> motivosFueraDeServicio = new ArrayList<>();
 
-
+    /* Corrección 3 (Al crear motivoFueraServicio, debe estar dentro del inicializador de CambioEstado.)
     public CambioEstado(LocalDateTime fechaHoraInicio, LocalDateTime fechaHoraFin, Estado estado) {
         this.fechaHoraInicio = fechaHoraInicio;
         this.fechaHoraFin = fechaHoraFin;
         this.estado = estado;
     }
 
+    public void crearMotivoFueraDeServicio(Map<MotivoTipo, String> comentarios) {
+        for (Map.Entry<MotivoTipo, String> entry : comentarios.entrySet()) {
+            MotivoTipo tipo = entry.getKey();
+            String comentario = entry.getValue();
+
+            MotivoFueraServicio nuevoMotivo = new MotivoFueraServicio(comentario, tipo);
+            motivosFueraDeServicio.add(nuevoMotivo);
+        }
+    }
+
+     */
+
+    public CambioEstado(LocalDateTime fechaHoraInicio, Estado estado) {
+        this.fechaHoraInicio = fechaHoraInicio;
+        this.estado = estado;
+    }
+
+    public CambioEstado(LocalDateTime fechaHoraInicio,
+                        Estado estado,
+                        Map<MotivoTipo, String> comentariosPorMotivo) {
+        this.fechaHoraInicio = Objects.requireNonNull(fechaHoraInicio, "inicio requerido");
+        this.fechaHoraFin = null; // vigente al crearse
+        this.estado = Objects.requireNonNull(estado, "estado requerido");
+
+        // Solo generamos motivos si corresponde (ajustá la condición a tu modelo)
+        if (comentariosPorMotivo != null && !comentariosPorMotivo.isEmpty()
+                && esFueraDeServicio(estado)) {
+            comentariosPorMotivo.forEach((tipo, comentario) ->
+                    motivosFueraDeServicio.add(new MotivoFueraServicio(comentario, tipo))
+            );
+        }
+    }
+
+    private boolean esFueraDeServicio(Estado estado) {
+        return estado.esFueraDeServicio(); // o compará por tipo/ID/enum
+    }
 
     public boolean esEstadoActual(Estado estado) {
         return this.estado != null && this.estado.equals(estado);
@@ -44,15 +81,6 @@ public class CambioEstado {
     }
 
 
-    public void crearMotivoFueraDeServicio(Map<MotivoTipo, String> comentarios) {
-        for (Map.Entry<MotivoTipo, String> entry : comentarios.entrySet()) {
-            MotivoTipo tipo = entry.getKey();
-            String comentario = entry.getValue();
-
-            MotivoFueraServicio nuevoMotivo = new MotivoFueraServicio(comentario, tipo);
-            motivosFueraDeServicio.add(nuevoMotivo);
-        }
-    }
 
     public void setFechaHoraInicio(LocalDateTime fechaHoraInicio) {
         this.fechaHoraInicio = fechaHoraInicio;

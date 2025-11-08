@@ -13,7 +13,7 @@ public class PantallaCCRS {
             String estado,
             LocalDateTime fechaHora,
             List<String> motivosYComentarios,
-            String tituloPantalla
+            String tituloPantalla //variable solo para CCRS
     ) {
         StringBuilder mensaje = new StringBuilder();
         mensaje.append("Visualización para el Centro de Coordinación de la Red Sísmica\n\n");

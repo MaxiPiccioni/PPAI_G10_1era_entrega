@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter;
 public class InterfazEmail {
 
     public static void notificarCierre(
-            List<String> emailsResponsables,
+            List<String> emailsResponsables,// variable solo para mail
             String identificadorSismografo,
             String estado,
             LocalDateTime fechaHora,

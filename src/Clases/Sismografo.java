@@ -35,14 +35,6 @@ public class Sismografo {
     }
 
 
-    public void sismografoEnFueraDeServicio(Estado estadoFueraServicio, Map<MotivoTipo, String> comentariosPorMotivo) {
-        CambioEstado estadoActual = obtenerCambioEstadoActual();
-
-        if (estadoActual != null) {
-            estadoActual.setFechaHoraFin();
-        }
-        crearNuevoCambioDeEstado(estadoFueraServicio, comentariosPorMotivo);
-    }
 
 
     public void sismografoEnLinea(Estado estadoEnLinea) {
@@ -50,6 +42,9 @@ public class Sismografo {
     }
 
 
+    /* Correción 2 (Corregir CambioEstado --> obtenerCambioEstadoActual() --> getEstado -No hay
+    que pedir estado, hay que pedir fechaHoraFin y debe ser null.
+)
     public CambioEstado obtenerCambioEstadoActual() {
         for (CambioEstado cambioEstado : cambiosEstado) {
             if (cambioEstado.esEstadoActual(cambioEstado.getEstado())) {
@@ -60,13 +55,48 @@ public class Sismografo {
     }
 
 
+    public void sismografoEnFueraDeServicio(Estado estadoFueraServicio, Map<MotivoTipo, String> comentariosPorMotivo) {
+        CambioEstado estadoActual = obtenerCambioEstadoActual();
+
+        if (estadoActual != null) {
+            estadoActual.setFechaHoraFin();
+        }
+        crearNuevoCambioDeEstado(estadoFueraServicio, comentariosPorMotivo);
+    }
+     */
+
+
+    public void sismografoEnFueraDeServicio(Estado estadoFueraServicio,
+                                            Map<MotivoTipo, String> comentariosPorMotivo) {
+        CambioEstado vigente = obtenerCambioEstadoVigente();
+
+        if (vigente != null) {
+            // Si tu setter pone "ahora" por defecto, dejalo sin argumento.
+            // Si no, pasale LocalDateTime.now().
+            vigente.setFechaHoraFin(); // o vigente.setFechaHoraFin(LocalDateTime.now());
+        }
+
+        crearNuevoCambioDeEstado(estadoFueraServicio, comentariosPorMotivo);
+    }
+
+
+    public CambioEstado obtenerCambioEstadoVigente() {
+        for (CambioEstado cambioEstado : cambiosEstado) {
+            if (cambioEstado.getFechaHoraFin() == null) {
+                return cambioEstado;
+            }
+        }
+        return null;
+    }
+
+
+
     public void crearNuevoCambioDeEstado(Estado estadoFueraServicio,Map<MotivoTipo, String> comentariosPorMotivo) {
         CambioEstado nuevoEstado = new CambioEstado(
                 LocalDateTime.now(),
-                null,
-                estadoFueraServicio
+                estadoFueraServicio,
+                comentariosPorMotivo
         );
-        nuevoEstado.crearMotivoFueraDeServicio(comentariosPorMotivo);
         setEstadoActual(estadoFueraServicio);
         cambiosEstado.add(nuevoEstado);
     }

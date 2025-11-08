@@ -45,12 +45,12 @@ public class Main {
 
 
         // Crear cambios de estados
-        CambioEstado cambioEstadoCompletamenteRealizada = new CambioEstado(LocalDateTime.now(), null, completamenteRealizada);
-        CambioEstado cambioEstadoPendiente = new CambioEstado(LocalDateTime.now(), null, pendiente);
-        CambioEstado cambioEstadoCerrada = new CambioEstado(LocalDateTime.now(), null, cerrada);
-        CambioEstado cambioEstadoFueraServicio = new CambioEstado(LocalDateTime.now(), null, fueraServicio);
-        CambioEstado cambioEstadoEnLinea = new CambioEstado(LocalDateTime.now(), null, enLinea);
-        CambioEstado cambioEstadoFueraDeLinea = new CambioEstado(LocalDateTime.now(), null, fueraDeLinea);
+        CambioEstado cambioEstadoCompletamenteRealizada = new CambioEstado(LocalDateTime.now(), completamenteRealizada);
+        CambioEstado cambioEstadoPendiente = new CambioEstado(LocalDateTime.now(), pendiente);
+        CambioEstado cambioEstadoCerrada = new CambioEstado(LocalDateTime.now(), cerrada);
+        CambioEstado cambioEstadoFueraServicio = new CambioEstado(LocalDateTime.now(), fueraServicio);
+        CambioEstado cambioEstadoEnLinea = new CambioEstado(LocalDateTime.now(), enLinea);
+        CambioEstado cambioEstadoFueraDeLinea = new CambioEstado(LocalDateTime.now(), fueraDeLinea);
 
         List<CambioEstado> cambiosEstados = Arrays.asList(cambioEstadoCompletamenteRealizada, cambioEstadoPendiente, cambioEstadoCerrada, cambioEstadoFueraServicio, cambioEstadoEnLinea, cambioEstadoFueraDeLinea);
 
