@@ -43,7 +43,6 @@ public class CambioEstado {
         this.fechaHoraFin = null; // vigente al crearse
         this.estado = Objects.requireNonNull(estado, "estado requerido");
 
-        // Solo generamos motivos si corresponde (ajustá la condición a tu modelo)
         if (comentariosPorMotivo != null && !comentariosPorMotivo.isEmpty()
                 && esFueraDeServicio(estado)) {
             comentariosPorMotivo.forEach((tipo, comentario) ->
@@ -53,7 +52,7 @@ public class CambioEstado {
     }
 
     private boolean esFueraDeServicio(Estado estado) {
-        return estado.esFueraDeServicio(); // o compará por tipo/ID/enum
+        return estado.esFueraDeServicio();
     }
 
     public boolean esEstadoActual(Estado estado) {
@@ -79,7 +78,6 @@ public class CambioEstado {
     public List<MotivoFueraServicio> getMotivosFueraDeServicio() {
         return motivosFueraDeServicio;
     }
-
 
 
     public void setFechaHoraInicio(LocalDateTime fechaHoraInicio) {

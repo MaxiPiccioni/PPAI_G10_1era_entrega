@@ -15,10 +15,10 @@ public class Main {
 
 
         // Crear empleados
-        Empleado empleado1 = new Empleado("Juan", "Pérez", "3513123430", "juan@frcsistemas.com", rolRI);
-        Empleado empleado2 = new Empleado("Ana", "Gómez", "35431242443", "ana@frcsistemas.com", rolRI);
-        Empleado empleado3 = new Empleado("Luis", "López", "3513489767", "luis@frcsistemas.com", rolRR);
-        Empleado empleado4 = new Empleado("Jorge", "Gomez", "2644575621", "jorge@frcsistemas.com", rolRR);
+        Empleado empleado1 = new Empleado("Matias", "Sanchez", "3513123430", "matiassanchez0762@gmail.com", rolRI);
+        Empleado empleado2 = new Empleado("Ignacio", "Linzoain", "35431242443", "ignalinzoain@gmail.com", rolRI);
+        Empleado empleado3 = new Empleado("Tito", "Rojo", "3513489767", "tithor200@gmail.com", rolRR);
+        Empleado empleado4 = new Empleado("Francisco", "Sanchez", "2644575621", "11francisco.sanchez@gmail.com", rolRR);
 
         List<Empleado> empleados = Arrays.asList(empleado1, empleado2, empleado3, empleado4);
 

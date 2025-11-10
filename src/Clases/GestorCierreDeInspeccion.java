@@ -1,9 +1,13 @@
 package Clases;
 
+import Clases.Interfaces.IObservadorCierreOrdenInspeccion;
+import Clases.Interfaces.ISujeto;
+import jakarta.mail.MessagingException;
+
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class GestorCierreDeInspeccion {
+public class GestorCierreDeInspeccion implements ISujeto {
     private OrdenDeInspeccion ordenSeleccionada;
     private String observacionIngresada;
     private List<Empleado> empleados;
@@ -18,6 +22,14 @@ public class GestorCierreDeInspeccion {
     private List<String> emailsResponsables = new ArrayList<>();
     private EstacionSismologica estacionSismologica;
     private Estado estadoFueraServicio;
+    private final PantallaCCRS pantallaCCRS_Norte = new PantallaCCRS();
+    private final PantallaCCRS pantallaCCRS_Sur = new PantallaCCRS();
+    private InterfazEmail interfazEmail;
+    private final List<IObservadorCierreOrdenInspeccion> observadores = new java.util.concurrent.CopyOnWriteArrayList<>();
+    private String idSismografo;
+    private String nombreEstado;
+    private LocalDateTime fechaHora;
+    private List<String> motivosYComentarios;
 
 
     public GestorCierreDeInspeccion(List<Empleado> empleados, Sesion sesion, List<OrdenDeInspeccion> ordenes, List<MotivoTipo> motivoTipos, List<Estado> estados) {
@@ -154,7 +166,7 @@ public class GestorCierreDeInspeccion {
         estadoFueraServicio = obtenerEstadoFueraDeServicioSismografo();
         estacionSismologica = ordenSeleccionada.getEstacion();
         estacionSismologica.ponerSismografoEnFueraDeServicio(estadoFueraServicio, comentariosPorMotivo);
-        obtenerResponsableDeReparacion();
+        this.obtenerResponsableDeReparacion();
     }
 
 
@@ -168,20 +180,36 @@ public class GestorCierreDeInspeccion {
     }
 
 
+    public void finCU(){
+        System.out.println("Fin Caso de uso con éxito.");
+    }
+
     public void notificarCierre() {
         Sismografo sismografo = estacionSismologica.getSismografo();
         CambioEstado nuevoCambio = sismografo.obtenerUltimoCambioDeEstado();
 
-        String idSismografo = sismografo.getIdentificadorSismografo();
-        String nombreEstado = nuevoCambio.getEstado().getNombre();
-        LocalDateTime fechaHoraInicio = nuevoCambio.getFechaHoraInicio();
+        idSismografo = sismografo.getIdentificadorSismografo(); // idSis
+        nombreEstado = nuevoCambio.getEstado().getNombre(); //nombreEstado
+        fechaHora = nuevoCambio.getFechaHoraInicio(); //fechaHora
 
-        List<String> resumenMotivos = new ArrayList<>();
+        motivosYComentarios = new ArrayList<>();//motivosYcomentarios
         for (MotivoFueraServicio motivo : nuevoCambio.getMotivosFueraDeServicio()) {
             String linea = motivo.getMotivoTipo().getDescripcion() + ": " + motivo.getComentario();
-            resumenMotivos.add(linea);
+            motivosYComentarios.add(linea);
         }
 
+        interfazEmail = new InterfazEmail();
+        List<IObservadorCierreOrdenInspeccion> lista = new ArrayList<>();
+        lista.add(interfazEmail);
+        lista.add(pantallaCCRS_Sur);
+        lista.add(pantallaCCRS_Norte);
+
+        this.suscribir(lista);
+
+        this.notificar();
+
+
+        /*
         new Thread(() -> {
             InterfazEmail.notificarCierre(emailsResponsables, idSismografo, nombreEstado, fechaHoraInicio, resumenMotivos);
         }).start();
@@ -192,10 +220,8 @@ public class GestorCierreDeInspeccion {
         }).start();
 
         finCU();
-    }
 
-    public void finCU(){
-        System.out.println("Fin Caso de uso con éxito.");
+         */
     }
 
 
@@ -213,5 +239,31 @@ public class GestorCierreDeInspeccion {
         Estado estadoEnLinea = obtenerEstadoEnLineaSismografo();
         estacionSismologica = ordenSeleccionada.getEstacion();
         estacionSismologica.ponerSismografoEnLinea(estadoEnLinea);
+    }
+
+
+    @Override
+    public void suscribir(List<IObservadorCierreOrdenInspeccion> o) {
+        if (o == null) return;
+        for (IObservadorCierreOrdenInspeccion obs : o) {
+            if (obs != null && !observadores.contains(obs)) {
+                observadores.add(obs);
+            }
+        }
+
+    }
+
+    @Override
+    public void quitar(List<IObservadorCierreOrdenInspeccion> o) {
+        if (o == null) return;
+        observadores.removeAll(o);
+
+    }
+
+    @Override
+    public void notificar() {
+        interfazEmail.actualizar(idSismografo, nombreEstado, fechaHora, motivosYComentarios, null, emailsResponsables);
+        pantallaCCRS_Norte.actualizar(idSismografo, nombreEstado, fechaHora, motivosYComentarios, "Pantalla CCRS - Sala Norte", emailsResponsables);
+        pantallaCCRS_Sur.actualizar(idSismografo, nombreEstado, fechaHora, motivosYComentarios, "Pantalla CCRS - Sala Sur", emailsResponsables);
     }
 }
