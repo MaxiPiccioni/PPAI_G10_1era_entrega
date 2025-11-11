@@ -4,8 +4,6 @@ import Clases.Interfaces.IObservadorCierreOrdenInspeccion;
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
 import java.util.Properties;
-import javax.swing.*;
-import java.awt.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.time.format.DateTimeFormatter;

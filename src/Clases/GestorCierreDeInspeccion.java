@@ -2,7 +2,6 @@ package Clases;
 
 import Clases.Interfaces.IObservadorCierreOrdenInspeccion;
 import Clases.Interfaces.ISujeto;
-import jakarta.mail.MessagingException;
 
 import java.time.LocalDateTime;
 import java.util.*;

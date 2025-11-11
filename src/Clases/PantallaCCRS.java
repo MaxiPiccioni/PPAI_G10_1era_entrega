@@ -42,6 +42,7 @@ public class PantallaCCRS implements IObservadorCierreOrdenInspeccion {
         JOptionPane.showMessageDialog(null, panelPantalla, tituloPantalla, JOptionPane.INFORMATION_MESSAGE);
     }
  */
+
     @Override
     public void actualizar(String identificadorSismografo, String estado, LocalDateTime fechaHora, List<String> motivosYComentarios, String tituloPantalla, List<String> emailsResponsables) {
         StringBuilder mensaje = new StringBuilder();
