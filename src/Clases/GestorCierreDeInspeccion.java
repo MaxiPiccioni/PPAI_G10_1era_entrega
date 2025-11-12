@@ -24,14 +24,15 @@ public class GestorCierreDeInspeccion implements ISujeto {
     private final PantallaCCRS pantallaCCRS_Norte = new PantallaCCRS();
     private final PantallaCCRS pantallaCCRS_Sur = new PantallaCCRS();
     private InterfazEmail interfazEmail;
+    private List<Sismografo> sismografos;
     private final List<IObservadorCierreOrdenInspeccion> observadores = new java.util.concurrent.CopyOnWriteArrayList<>();
-    private String idSismografo;
+    private String identificadorSismografo;
     private String nombreEstado;
     private LocalDateTime fechaHora;
     private List<String> motivosYComentarios;
 
 
-    public GestorCierreDeInspeccion(List<Empleado> empleados, Sesion sesion, List<OrdenDeInspeccion> ordenes, List<MotivoTipo> motivoTipos, List<Estado> estados) {
+    public GestorCierreDeInspeccion(List<Empleado> empleados, Sesion sesion, List<OrdenDeInspeccion> ordenes, List<MotivoTipo> motivoTipos, List<Estado> estados, List<Sismografo> sismografos) {
         this.empleados = empleados;
         this.sesion = sesion;
         this.ordenes = ordenes;
@@ -40,6 +41,7 @@ public class GestorCierreDeInspeccion implements ISujeto {
         this.motivosSeleccionados = new ArrayList<>();
         this.comentariosPorMotivo = new HashMap<>();
         this.estados = estados;
+        this.sismografos = sismografos;
     }
 
     public void nuevoCierre() {
@@ -159,12 +161,25 @@ public class GestorCierreDeInspeccion implements ISujeto {
         }
         return null;
     }
-
+    // --- Búsqueda por identificador (simple y segura) ---
+    private Sismografo buscarSismografoPorIdentificador(String identificadorSismografo) {
+        if (identificadorSismografo == null || identificadorSismografo.isBlank()) {
+            throw new IllegalArgumentException("identificadorSismografo vacío o nulo");
+        }
+        for (Sismografo s : sismografos) {
+            if (identificadorSismografo.equals(s.getIdentificadorSismografo())) {
+                return s;
+            }
+        }
+        throw new IllegalArgumentException("Sismógrafo no encontrado: " + identificadorSismografo);
+    }
 
     public void ponerSismografoEnFueraDeServicio(){
         estadoFueraServicio = obtenerEstadoFueraDeServicioSismografo();
         estacionSismologica = ordenSeleccionada.getEstacion();
-        estacionSismologica.ponerSismografoEnFueraDeServicio(estadoFueraServicio, comentariosPorMotivo);
+        identificadorSismografo = ordenSeleccionada.getIdentificadorSismografo();
+        Sismografo s = this.buscarSismografoPorIdentificador(identificadorSismografo);
+        s.sismografoEnFueraDeServicio(estadoFueraServicio, comentariosPorMotivo);
         this.obtenerResponsableDeReparacion();
     }
 
@@ -184,10 +199,9 @@ public class GestorCierreDeInspeccion implements ISujeto {
     }
 
     public void notificarCierre() {
-        Sismografo sismografo = estacionSismologica.getSismografo();
-        CambioEstado nuevoCambio = sismografo.obtenerUltimoCambioDeEstado();
+        Sismografo s = this.buscarSismografoPorIdentificador(identificadorSismografo);
+        CambioEstado nuevoCambio = s.obtenerUltimoCambioDeEstado();
 
-        idSismografo = sismografo.getIdentificadorSismografo(); // idSis
         nombreEstado = nuevoCambio.getEstado().getNombre(); //nombreEstado
         fechaHora = nuevoCambio.getFechaHoraInicio(); //fechaHora
 
@@ -210,17 +224,17 @@ public class GestorCierreDeInspeccion implements ISujeto {
 
         /*
         new Thread(() -> {
-            InterfazEmail.notificarCierre(emailsResponsables, idSismografo, nombreEstado, fechaHoraInicio, resumenMotivos);
+            InterfazEmail.notificarCierre(emailsResponsables, identificadorSismografo, nombreEstado, fechaHoraInicio, resumenMotivos);
         }).start();
 
         new Thread(() -> {
-            PantallaCCRS.mostrarEnPantalla(idSismografo, nombreEstado, fechaHoraInicio, resumenMotivos, "Pantalla CCRS - Sala Norte");
-            PantallaCCRS.mostrarEnPantalla(idSismografo, nombreEstado, fechaHoraInicio, resumenMotivos, "Pantalla CCRS - Sala Sur");
+            PantallaCCRS.mostrarEnPantalla(identificadorSismografo, nombreEstado, fechaHoraInicio, resumenMotivos, "Pantalla CCRS - Sala Norte");
+            PantallaCCRS.mostrarEnPantalla(identificadorSismografo, nombreEstado, fechaHoraInicio, resumenMotivos, "Pantalla CCRS - Sala Sur");
         }).start();
-
+        */
         finCU();
 
-         */
+
     }
 
 
@@ -237,7 +251,9 @@ public class GestorCierreDeInspeccion implements ISujeto {
     public void ponerSismografoEnLinea(){
         Estado estadoEnLinea = obtenerEstadoEnLineaSismografo();
         estacionSismologica = ordenSeleccionada.getEstacion();
-        estacionSismologica.ponerSismografoEnLinea(estadoEnLinea);
+        identificadorSismografo = ordenSeleccionada.getIdentificadorSismografo();
+        Sismografo s = this.buscarSismografoPorIdentificador(identificadorSismografo);
+        s.sismografoEnLinea(estadoEnLinea);
     }
 
 
@@ -261,8 +277,8 @@ public class GestorCierreDeInspeccion implements ISujeto {
 
     @Override
     public void notificar() {
-        interfazEmail.actualizar(idSismografo, nombreEstado, fechaHora, motivosYComentarios, null, emailsResponsables);
-        pantallaCCRS_Norte.actualizar(idSismografo, nombreEstado, fechaHora, motivosYComentarios, "Pantalla CCRS - Sala Norte", emailsResponsables);
-        pantallaCCRS_Sur.actualizar(idSismografo, nombreEstado, fechaHora, motivosYComentarios, "Pantalla CCRS - Sala Sur", emailsResponsables);
+        interfazEmail.actualizar(identificadorSismografo, nombreEstado, fechaHora, motivosYComentarios, null, emailsResponsables);
+        pantallaCCRS_Norte.actualizar(identificadorSismografo, nombreEstado, fechaHora, motivosYComentarios, "Pantalla CCRS - Sala Norte", emailsResponsables);
+        pantallaCCRS_Sur.actualizar(identificadorSismografo, nombreEstado, fechaHora, motivosYComentarios, "Pantalla CCRS - Sala Sur", emailsResponsables);
     }
 }

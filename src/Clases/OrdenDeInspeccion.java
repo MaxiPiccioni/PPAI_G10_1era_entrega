@@ -136,6 +136,9 @@ public class OrdenDeInspeccion {
         this.estacionSismologica = estacionSismologica;
     }
 
+    public String getIdentificadorSismografo(){
+        return estacionSismologica.getIdentificadorSismografo();
+    }
 
     public Estado getEstado() {
         return this.estado = estado;

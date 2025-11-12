@@ -12,8 +12,11 @@ public class EstacionSismologica {
     private Integer longitud;
     private String nombre;
     private Integer nroCertificacionAdquisicion;
-    private Sismografo sismografo;
     private List<CambioEstado> cambiosEstado;
+    /* corrección 1
+    private Sismografo sismografo;
+     */
+    private String identificadorSismografo;
 
 
     public EstacionSismologica(int codigoEstacion, String nombre) {
@@ -32,6 +35,20 @@ public class EstacionSismologica {
     }
 
 
+
+    // -----------------------------------------
+    // Nuevo modelo: trabajar con el identificador
+    // -----------------------------------------
+    public String getIdentificadorSismografo() {
+        return identificadorSismografo != null ? identificadorSismografo : "";
+    }
+
+    public void setIdentificadorSismografo(String identificadorSismografo) {
+        this.identificadorSismografo = identificadorSismografo;
+    }
+
+
+    /*
     public void ponerSismografoEnFueraDeServicio(Estado estadoFueraServicio, Map<MotivoTipo, String>comentariosPorMotivo) {
         sismografo.sismografoEnFueraDeServicio(estadoFueraServicio, comentariosPorMotivo);
     }
@@ -53,6 +70,8 @@ public class EstacionSismologica {
     public Sismografo getSismografo() {
         return sismografo;
     }
+
+     */
 
     public void setCodigoEstacion(int codigoEstacion) {
         this.codigoEstacion = codigoEstacion;
@@ -110,7 +129,4 @@ public class EstacionSismologica {
         this.cambiosEstado = cambiosEstado;
     }
 
-    public void ponerSismografoEnLinea(Estado estadoEnLinea) {
-        sismografo.sismografoEnLinea(estadoEnLinea);
-    }
 }

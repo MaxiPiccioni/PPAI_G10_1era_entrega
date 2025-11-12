@@ -66,11 +66,15 @@ public class Main {
         Sismografo sismografo2 = new Sismografo(LocalDate.of(2024,3,10), "SIS-002", "SN1002", estacion2, cambiosEstados, fueraDeLinea);
         Sismografo sismografo3 = new Sismografo(LocalDate.of(2022,6,5), "SIS-003", "SN1003", estacion3, cambiosEstados, fueraDeLinea);
 
+        List<Sismografo> sismografos = new ArrayList<>();
+        sismografos.add(sismografo1);
+        sismografos.add(sismografo2);
+        sismografos.add(sismografo3);
 
         // Asignar sismógrafos a estaciones.
-        estacion1.setSismografo(sismografo1);
-        estacion2.setSismografo(sismografo2);
-        estacion3.setSismografo(sismografo3);
+        estacion1.setIdentificadorSismografo("SIS-001");
+        estacion2.setIdentificadorSismografo("SIS-002");
+        estacion3.setIdentificadorSismografo("SIS-003");
 
 
         // Crear órdenes de inspección asociando estación sismológica.
@@ -104,7 +108,7 @@ public class Main {
 
 
         // Crear el gestor
-        GestorCierreDeInspeccion gestor = new GestorCierreDeInspeccion(empleados, sesionActiva, ordenes, motivoTipos, estados);
+        GestorCierreDeInspeccion gestor = new GestorCierreDeInspeccion(empleados, sesionActiva, ordenes, motivoTipos, estados, sismografos);
 
 
         // GUI
