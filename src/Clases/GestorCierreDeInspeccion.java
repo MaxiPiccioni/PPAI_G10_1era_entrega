@@ -19,7 +19,6 @@ public class GestorCierreDeInspeccion implements ISujeto {
     private Map<MotivoTipo, String> comentariosPorMotivo;
     private List<Estado> estados;
     private List<String> emailsResponsables = new ArrayList<>();
-    private EstacionSismologica estacionSismologica;
     private Estado estadoFueraServicio;
     private final PantallaCCRS pantallaCCRS_Norte = new PantallaCCRS();
     private final PantallaCCRS pantallaCCRS_Sur = new PantallaCCRS();
@@ -176,7 +175,6 @@ public class GestorCierreDeInspeccion implements ISujeto {
 
     public void ponerSismografoEnFueraDeServicio(){
         estadoFueraServicio = obtenerEstadoFueraDeServicioSismografo();
-        estacionSismologica = ordenSeleccionada.getEstacion();
         identificadorSismografo = ordenSeleccionada.getIdentificadorSismografo();
         Sismografo s = this.buscarSismografoPorIdentificador(identificadorSismografo);
         s.sismografoEnFueraDeServicio(estadoFueraServicio, comentariosPorMotivo);
@@ -250,7 +248,6 @@ public class GestorCierreDeInspeccion implements ISujeto {
 
     public void ponerSismografoEnLinea(){
         Estado estadoEnLinea = obtenerEstadoEnLineaSismografo();
-        estacionSismologica = ordenSeleccionada.getEstacion();
         identificadorSismografo = ordenSeleccionada.getIdentificadorSismografo();
         Sismografo s = this.buscarSismografoPorIdentificador(identificadorSismografo);
         s.sismografoEnLinea(estadoEnLinea);

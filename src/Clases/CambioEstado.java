@@ -20,7 +20,8 @@ public class CambioEstado {
     }
 
     public void crearMotivoFueraDeServicio(Map<MotivoTipo, String> comentarios) {
-        for (Map.Entry<MotivoTipo, String> entry : comentarios.entrySet()) {
+        for (Map.Entry<MotivoTipo, String> entry : come
+        ntarios.entrySet()) {
             MotivoTipo tipo = entry.getKey();
             String comentario = entry.getValue();
 
@@ -78,7 +79,6 @@ public class CambioEstado {
     public List<MotivoFueraServicio> getMotivosFueraDeServicio() {
         return motivosFueraDeServicio;
     }
-
 
     public void setFechaHoraInicio(LocalDateTime fechaHoraInicio) {
         this.fechaHoraInicio = fechaHoraInicio;

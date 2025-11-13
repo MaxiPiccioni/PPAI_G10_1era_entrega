@@ -25,53 +25,53 @@ public class InterfazEmail implements IObservadorCierreOrdenInspeccion{
         this.smtpPass = smtpPass;
         this.fromAddress = fromAddress;
     }
-
-    public InterfazEmail() {
-    }
-
     /*
-    public static void notificarCierre(
-            List<String> emailsResponsables,// variable solo para mail
-            String identificadorSismografo,
-            String estado,
-            LocalDateTime fechaHora,
-            List<String> motivosYComentarios
-
-    ) {
-        StringBuilder mensaje = new StringBuilder();
-        mensaje.append("Mail enviado a: ")
-                .append(String.join(", ", emailsResponsables)).append("\n\n");
-
-        mensaje.append("El sismógrafo ").append(identificadorSismografo)
-                .append(" está en estado: ").append(estado).append(".\n");
-
-        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        String fechaFormateada = fechaHora.format(formato);
-
-        mensaje.append("Fecha y hora de registro del nuevo estado: ")
-                .append(fechaFormateada).append("\n\n");
-
-        mensaje.append("Motivos y comentarios asociados:\n");
-        for (String linea : motivosYComentarios) {
-            mensaje.append("- ").append(linea).append("\n");
+        public InterfazEmail() {
         }
 
-        JTextArea areaTexto = new JTextArea(mensaje.toString());
-        areaTexto.setEditable(false);
-        areaTexto.setFont(new Font("Monospaced", Font.PLAIN, 14));
-        JScrollPane panelEmail = new JScrollPane(areaTexto);
-        panelEmail.setPreferredSize(new Dimension(500, 300));
-        JOptionPane.showMessageDialog(null, panelEmail, "Simulación de envío de Mail", JOptionPane.INFORMATION_MESSAGE);
-    }
- */
+
+        public static void notificarCierre(
+                List<String> emailsResponsables,// variable solo para mail
+                String identificadorSismografo,
+                String estado,
+                LocalDateTime fechaHora,
+                List<String> motivosYComentarios
+
+        ) {
+            StringBuilder mensaje = new StringBuilder();
+            mensaje.append("Mail enviado a: ")
+                    .append(String.join(", ", emailsResponsables)).append("\n\n");
+
+            mensaje.append("El sismógrafo ").append(identificadorSismografo)
+                    .append(" está en estado: ").append(estado).append(".\n");
+
+            DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+            String fechaFormateada = fechaHora.format(formato);
+
+            mensaje.append("Fecha y hora de registro del nuevo estado: ")
+                    .append(fechaFormateada).append("\n\n");
+
+            mensaje.append("Motivos y comentarios asociados:\n");
+            for (String linea : motivosYComentarios) {
+                mensaje.append("- ").append(linea).append("\n");
+            }
+
+            JTextArea areaTexto = new JTextArea(mensaje.toString());
+            areaTexto.setEditable(false);
+            areaTexto.setFont(new Font("Monospaced", Font.PLAIN, 14));
+            JScrollPane panelEmail = new JScrollPane(areaTexto);
+            panelEmail.setPreferredSize(new Dimension(500, 300));
+            JOptionPane.showMessageDialog(null, panelEmail, "Simulación de envío de Mail", JOptionPane.INFORMATION_MESSAGE);
+        }
+     */
     @Override
     public void actualizar(String identificadorSismografo, String estado, LocalDateTime fechaHora, List<String> motivosYComentarios, String tituloPantalla, List<String> emailsResponsables) {
         this.configurarSMTP(
                 "smtp.gmail.com",         // host
-                587,                      // puerto STARTTLS (si usás SSL: 465)
-                "maxipiccioni@gmail.com",   // usuario SMTP
-                "ppvllgzpzfvitiwh",   // contraseña de aplicación
-                "maxipiccioni@gmail.com"    // from address
+                587,                      // puerto STARTTLS
+                "estacionsismologica@gmail.com",   // usuario SMTP
+                "etcalykctasmchkr",   // contraseña de aplicación
+                "estacionsismologica@gmail.com"    // from address
         );
         try {
             this.enviarEmail(identificadorSismografo, estado, fechaHora, motivosYComentarios, emailsResponsables);
@@ -106,8 +106,6 @@ public class InterfazEmail implements IObservadorCierreOrdenInspeccion{
                 return new PasswordAuthentication(smtpUser, smtpPass);
             }
         });
-        // Opcional para depurar:
-        // session.setDebug(true);
 
         MimeMessage msg = new MimeMessage(session);
         msg.setFrom(new InternetAddress(fromAddress));
@@ -137,7 +135,6 @@ public class InterfazEmail implements IObservadorCierreOrdenInspeccion{
             cuerpo.append("(sin motivos)\n");
         }
 
-        // Enviar como texto plano (si querés HTML, usá setContent con "text/html; charset=UTF-8")
         msg.setText(cuerpo.toString(), "UTF-8");
 
         Transport.send(msg);
