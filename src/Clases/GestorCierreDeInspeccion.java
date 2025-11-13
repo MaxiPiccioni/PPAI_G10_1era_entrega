@@ -31,7 +31,8 @@ public class GestorCierreDeInspeccion implements ISujeto {
     private List<String> motivosYComentarios;
 
 
-    public GestorCierreDeInspeccion(List<Empleado> empleados, Sesion sesion, List<OrdenDeInspeccion> ordenes, List<MotivoTipo> motivoTipos, List<Estado> estados, List<Sismografo> sismografos) {
+    public GestorCierreDeInspeccion(List<Empleado> empleados, Sesion sesion, List<OrdenDeInspeccion> ordenes,
+                                    List<MotivoTipo> motivoTipos, List<Estado> estados, List<Sismografo> sismografos) {
         this.empleados = empleados;
         this.sesion = sesion;
         this.ordenes = ordenes;
