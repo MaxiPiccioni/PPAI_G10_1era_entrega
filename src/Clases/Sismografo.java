@@ -18,7 +18,6 @@ public class Sismografo {
         this.fechaAdquisicion = fechaAdquisicion;
         this.identificadorSismografo = identificadorSismografo;
         this.nroSerie = nroSerie;
-        this.cambiosEstado = cambioEstado;
         this.estacionSismologica = estacionSismologica;
         this.cambiosEstado = new ArrayList<>();
         this.estadoActual = estadoActual;

@@ -12,7 +12,6 @@ public class EstacionSismologica {
     private Integer longitud;
     private String nombre;
     private Integer nroCertificacionAdquisicion;
-    private List<CambioEstado> cambiosEstado;
     /* corrección 1
     private Sismografo sismografo;
      */
@@ -121,12 +120,5 @@ public class EstacionSismologica {
         this.nroCertificacionAdquisicion = nroCertificacionAdquisicion;
     }
 
-    public List<CambioEstado> getCambiosEstado() {
-        return cambiosEstado;
-    }
-
-    public void setCambiosEstado(List<CambioEstado> cambiosEstado) {
-        this.cambiosEstado = cambiosEstado;
-    }
 
 }

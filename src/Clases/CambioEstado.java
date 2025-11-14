@@ -56,9 +56,6 @@ public class CambioEstado {
         return estado.esFueraDeServicio();
     }
 
-    public boolean esEstadoActual(Estado estado) {
-        return this.estado != null && this.estado.equals(estado);
-    }
 
 
     public Estado getEstado() {
