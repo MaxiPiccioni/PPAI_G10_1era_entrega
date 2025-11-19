@@ -2,6 +2,7 @@ package Clases;
 
 import Clases.Interfaces.IObservadorCierreOrdenInspeccion;
 import Clases.Interfaces.ISujeto;
+import infra.db.EmpleadoDao;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -50,6 +51,12 @@ public class GestorCierreDeInspeccion implements ISujeto {
 
 
     public void buscarEmpleado() {
+        EmpleadoDao empleadoDao = new EmpleadoDao();
+        List<EmpleadoDao.EmpleadoRow> empleadoDaos = empleadoDao.findAll();
+        for (EmpleadoDao.EmpleadoRow empleadoDao1 : empleadoDaos) {
+            System.out.println(empleadoDao1);
+        }
+
         empleadoLogueado = sesion.obtenerRILogueado();
     }
 

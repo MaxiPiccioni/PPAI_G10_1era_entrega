@@ -13,6 +13,7 @@ public class Usuario {
         this.nombreUsuario = nombreUsuario;
         this.contraseña = contraseña;
         this.empleado = empleado;
+        this.perfiles = null;
     }
 
 

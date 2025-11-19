@@ -7,6 +7,7 @@ public class Rol {
 
     public Rol(String nombre) {
         this.nombre = nombre;
+        this.descripcionRol = null;
     }
 
 
