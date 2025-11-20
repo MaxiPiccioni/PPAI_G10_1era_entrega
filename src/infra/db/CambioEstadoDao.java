@@ -12,6 +12,11 @@ public class CambioEstadoDao {
             "INSERT INTO CambioEstado(fechaHoraInicio, fechaHoraFin, idEstado, idMotivo, idEmpleado, identificadorSismografo) " +
                     "VALUES(?, NULL, ?, ?, ?, ?)";
 
+    // nuevo: inserción cuando ya tenemos fechaHoraFin
+    private static final String SQL_INSERT_WITH_FIN =
+            "INSERT INTO CambioEstado(fechaHoraInicio, fechaHoraFin, idEstado, idMotivo, idEmpleado, identificadorSismografo) " +
+                    "VALUES(?, ?, ?, ?, ?, ?)";
+
     private static final String SQL_CERRAR_POR_ID =
             "UPDATE CambioEstado SET fechaHoraFin = ? WHERE idCambio = ? AND fechaHoraFin IS NULL";
 
@@ -23,33 +28,118 @@ public class CambioEstadoDao {
             "SELECT idCambio, fechaHoraInicio, fechaHoraFin, idEstado, idMotivo, idEmpleado, identificadorSismografo " +
                     "FROM CambioEstado ORDER BY idCambio";
 
-    /** Abre un cambio (vigente). Devuelve idCambio generado. */
-    public int abrir(LocalDateTime inicio, int idEstado, Integer idMotivo, Integer idEmpleado, String identificadorSismografo) {
-        try (Connection c = SQLite.get();
-             PreparedStatement ps = c.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS)) {
-
-            ps.setString(1, (inicio != null ? inicio : LocalDateTime.now()).toString()); // ISO-8601
-            ps.setInt(2, idEstado);
-            if (idMotivo != null) ps.setInt(3, idMotivo); else ps.setNull(3, Types.INTEGER);
-            // idEmpleado puede ser null -> setObject con Types.INTEGER
-            if (idEmpleado != null) ps.setObject(4, idEmpleado, Types.INTEGER); else ps.setNull(4, Types.INTEGER);
-            ps.setString(5, identificadorSismografo);
-
-            // debug
-
-            ps.executeUpdate();
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) {
-                    int id = rs.getInt(1);
-                    return id;
-                }
-                throw new SQLException("No se obtuvo id generado para CambioEstado");
+    // helper: busca idCambio existente para la pareja (idEstado, identificadorSismografo)
+    private Integer findCambioPorEstadoEIdentificador(Connection c, int idEstado, String identificadorSismografo) throws SQLException {
+        String sql = "SELECT idCambio FROM CambioEstado WHERE idEstado = ? AND identificadorSismografo = ? LIMIT 1";
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, idEstado);
+            ps.setString(2, identificadorSismografo);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt("idCambio") : null;
             }
+        }
+    }
+
+    /** Abre un cambio (vigente). Si ya existe una fila con mismo idEstado+identificador, la actualiza en lugar de insertar. Devuelve idCambio. */
+    public int abrir(LocalDateTime inicio, int idEstado, Integer idMotivo, Integer idEmpleado, String identificadorSismografo) {
+        try (Connection c = SQLite.get()) {
+
+            // 1) intentar encontrar duplicado
+            Integer existingId = null;
+            try {
+                existingId = findCambioPorEstadoEIdentificador(c, idEstado, identificadorSismografo);
+            } catch (SQLException ignore) { /* seguir a inserción si falla la búsqueda */ }
+
+            if (existingId != null) {
+                // actualizar la fila existente
+                String sqlUpd = "UPDATE CambioEstado SET fechaHoraInicio = ?, fechaHoraFin = NULL, idMotivo = ?, idEmpleado = ? WHERE idCambio = ?";
+                try (PreparedStatement psUpd = c.prepareStatement(sqlUpd)) {
+                    psUpd.setString(1, (inicio != null ? inicio : LocalDateTime.now()).toString());
+                    if (idMotivo != null) psUpd.setInt(2, idMotivo); else psUpd.setNull(2, Types.INTEGER);
+                    if (idEmpleado != null) psUpd.setObject(3, idEmpleado, Types.INTEGER); else psUpd.setNull(3, Types.INTEGER);
+                    psUpd.setInt(4, existingId);
+                    psUpd.executeUpdate();
+                    return existingId;
+                } catch (SQLException e) {
+                    throw new RuntimeException("Error actualizando CambioEstado existente id=" + existingId, e);
+                }
+            }
+
+            // 2) si no existe, insertar como antes
+            try (PreparedStatement ps = c.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS)) {
+                ps.setString(1, (inicio != null ? inicio : LocalDateTime.now()).toString()); // ISO-8601
+                ps.setInt(2, idEstado);
+                if (idMotivo != null) ps.setInt(3, idMotivo); else ps.setNull(3, Types.INTEGER);
+                // idEmpleado puede ser null -> setObject con Types.INTEGER
+                if (idEmpleado != null) ps.setObject(4, idEmpleado, Types.INTEGER); else ps.setNull(4, Types.INTEGER);
+                ps.setString(5, identificadorSismografo);
+
+                ps.executeUpdate();
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                    throw new SQLException("No se obtuvo id generado para CambioEstado");
+                }
+            } catch (SQLException e) {
+                System.err.println("[CambioEstadoDao] Error abriendo CambioEstado: " + e.getMessage());
+                e.printStackTrace();
+                throw new RuntimeException("Error abriendo CambioEstado", e);
+            }
+
         } catch (SQLException e) {
-            // loguear stacktrace para depuración antes de re-lanzar
-            System.err.println("[CambioEstadoDao] Error abriendo CambioEstado: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Error abriendo CambioEstado", e);
+            throw new RuntimeException("Error en conexión al abrir CambioEstado", e);
+        }
+    }
+
+    /** Abre un cambio con fechaHoraFin (no vigente). Evita duplicados por idEstado+identificador (actualiza si existe). */
+    public int abrirConFin(LocalDateTime inicio, LocalDateTime fin, int idEstado, Integer idMotivo, Integer idEmpleado, String identificadorSismografo) {
+        try (Connection c = SQLite.get()) {
+
+            // 1) intentar encontrar duplicado
+            Integer existingId = null;
+            try {
+                existingId = findCambioPorEstadoEIdentificador(c, idEstado, identificadorSismografo);
+            } catch (SQLException ignore) { /* seguir a inserción si falla la búsqueda */ }
+
+            if (existingId != null) {
+                // actualizar la fila existente con fecha fin
+                String sqlUpd = "UPDATE CambioEstado SET fechaHoraInicio = ?, fechaHoraFin = ?, idMotivo = ?, idEmpleado = ? WHERE idCambio = ?";
+                try (PreparedStatement psUpd = c.prepareStatement(sqlUpd)) {
+                    psUpd.setString(1, (inicio != null ? inicio : LocalDateTime.now()).toString());
+                    psUpd.setString(2, (fin != null ? fin : LocalDateTime.now()).toString());
+                    if (idMotivo != null) psUpd.setInt(3, idMotivo); else psUpd.setNull(3, Types.INTEGER);
+                    if (idEmpleado != null) psUpd.setObject(4, idEmpleado, Types.INTEGER); else psUpd.setNull(4, Types.INTEGER);
+                    psUpd.setInt(5, existingId);
+                    psUpd.executeUpdate();
+                    return existingId;
+                } catch (SQLException e) {
+                    throw new RuntimeException("Error actualizando (con fin) CambioEstado existente id=" + existingId, e);
+                }
+            }
+
+            // 2) si no existe, insertar con fin
+            try (PreparedStatement ps = c.prepareStatement(SQL_INSERT_WITH_FIN, Statement.RETURN_GENERATED_KEYS)) {
+                ps.setString(1, (inicio != null ? inicio : LocalDateTime.now()).toString()); // ISO-8601
+                ps.setString(2, (fin != null ? fin : LocalDateTime.now()).toString());
+                ps.setInt(3, idEstado);
+                if (idMotivo != null) ps.setInt(4, idMotivo); else ps.setNull(4, Types.INTEGER);
+                if (idEmpleado != null) ps.setObject(5, idEmpleado, Types.INTEGER); else ps.setNull(5, Types.INTEGER);
+                ps.setString(6, identificadorSismografo);
+
+                ps.executeUpdate();
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) return rs.getInt(1);
+                    throw new SQLException("No se obtuvo id generado para CambioEstado");
+                }
+            } catch (SQLException e) {
+                System.err.println("[CambioEstadoDao] Error abriendo (con fin) CambioEstado: " + e.getMessage());
+                e.printStackTrace();
+                throw new RuntimeException("Error abriendo CambioEstado con fin", e);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error en conexión al abrir (con fin) CambioEstado", e);
         }
     }
 

@@ -2,6 +2,7 @@ import Clases.*;
 import infra.db.*;
 
 import javax.swing.*;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,6 +13,37 @@ public class Main {
     public static void main(String[] args) {
         // 1) Inicializar DB (crea ccrs.db y tablas si no existen)
         SQLite.init();
+
+        // Limpieza: borrar datos previos para arrancar siempre desde cero (útil en tests/desarrollo)
+        try (java.sql.Connection c = SQLite.get();
+             java.sql.Statement s = c.createStatement()) {
+            // desactivar temporariamente FK para permitir borrado en cualquier orden
+            try { s.execute("PRAGMA foreign_keys = OFF"); } catch (Exception ignore) {}
+
+            String[] tablas = new String[] {
+                    "CambioEstado",
+                    "Sismografo",
+                    "OrdenDeInspeccion",
+                    "MotivoTipo",
+                    "Empleado",
+                    "Usuario",
+                    "Sesion",
+                    "EstacionSismologica",
+                    "Rol",
+                    "Estado"
+            };
+            for (String t : tablas) {
+                try { s.executeUpdate("DELETE FROM " + t); } catch (SQLException ignore) { /* tabla puede no existir */ }
+                try { s.executeUpdate("DELETE FROM sqlite_sequence WHERE name='" + t + "'"); } catch (SQLException ignore) {}
+            }
+
+            try { s.execute("PRAGMA foreign_keys = ON"); } catch (Exception ignore) {}
+            // compactar la base para liberar espacio e indices
+            try (java.sql.Statement s2 = c.createStatement()) { s2.execute("VACUUM"); } catch (Exception ignore) {}
+        } catch (Exception e) {
+            System.err.println("No se pudo limpiar la base de datos inicial: " + e.getMessage());
+        }
+
 
         // 2) Seed de Roles (ANTES de crear el Gestor u otros objetos que los usen)
 
@@ -29,7 +61,7 @@ public class Main {
 // Tu hardcode actual
         Empleado empleado1 = new Empleado("Matias", "Sanchez", "3513123430", "matiassanchez0762@gmail.com", rolRI);
         Empleado empleado2 = new Empleado("Ignacio", "Linzoain", "35431242443", "ignalinzoain@gmail.com", rolRI);
-        Empleado empleado3 = new Empleado("Salvador", "Barbera", "3513489767", "mati@gmail.com", rolRR);
+        Empleado empleado3 = new Empleado("Salvador", "Barbera", "3513489767", "11francisco.sanchez@gmail.com", rolRR);
         //Empleado empleado3 = new Empleado("Salvador", "Barbera", "3513489767", "jsbarbera4@gmail.com", rolRR);
         //Empleado empleado4 = new Empleado("Maximo", "Piccioni", "2644575621", "ezeizaguirre02@gmail.com", rolRR);
         Empleado empleado4 = new Empleado("Maximo", "Piccioni", "2644575621", "maxipiccioni@gmail.com", rolRR);
@@ -147,19 +179,49 @@ public class Main {
 
         // Crear cambios de estados
             // Objeto de dominio (tu hardcode)
-        CambioEstado cambioEstadoCompletamenteRealizada = new CambioEstado(java.time.LocalDateTime.now(), completamenteRealizada);
+        CambioEstado cambioEstadoCompletamenteRealizada = new CambioEstado(LocalDateTime.now(), completamenteRealizada);
         CambioEstado cambioEstadoPendiente = new CambioEstado(LocalDateTime.now(), pendiente);
         CambioEstado cambioEstadoCerrada = new CambioEstado(LocalDateTime.now(), cerrada);
-        CambioEstado cambioEstadoFueraServicio = new CambioEstado(LocalDateTime.now(), fueraServicio);
-        CambioEstado cambioEstadoEnLinea = new CambioEstado(LocalDateTime.now(), enLinea);
+        CambioEstado cambioEstadoFueraServicio = new CambioEstado(LocalDateTime.now(), LocalDateTime.now(), fueraServicio);
+        CambioEstado cambioEstadoEnLinea = new CambioEstado(LocalDateTime.now(), LocalDateTime.now(), enLinea);
         CambioEstado cambioEstadoFueraDeLinea = new CambioEstado(LocalDateTime.now(), fueraDeLinea);
 
         
 
             // si tu clase CambioEstado tiene setIdCambio(int):
             // cambioEstadoCompletamenteRealizada.setIdCambio(idCambio);
+        List<CambioEstado> cambioEstadosSismografo = Arrays.asList(cambioEstadoFueraServicio, cambioEstadoEnLinea, cambioEstadoFueraDeLinea);
 
-        List<CambioEstado> cambiosEstados = Arrays.asList(cambioEstadoCompletamenteRealizada, cambioEstadoPendiente, cambioEstadoCerrada, cambioEstadoFueraServicio, cambioEstadoEnLinea, cambioEstadoFueraDeLinea);
+        List<CambioEstado> cambiosEstadosOrden = Arrays.asList(cambioEstadoCompletamenteRealizada, cambioEstadoPendiente, cambioEstadoCerrada);
+
+        CambioEstadoDao cambioDao = new CambioEstadoDao();
+
+        for (CambioEstado c: cambiosEstadosOrden){
+            int idEstadoCambio = estadoDao.getIdByNombre(c.getEstado().getNombre());
+            try {
+                if (c.getFechaHoraFin() == null) {
+                    int idCambio = cambioDao.abrir(
+                            c.getFechaHoraInicio(),
+                            idEstadoCambio,
+                            null, // idMotivo si corresponde
+                            idEmp1, // o el empleado correspondiente
+                            null // identificador textual
+                    );
+                } else {
+                    int idCambio = cambioDao.abrirConFin(
+                            c.getFechaHoraInicio(),
+                            c.getFechaHoraFin(),
+                            idEstadoCambio,
+                            null, // idMotivo si corresponde
+                            idEmp1, // o el empleado correspondiente
+                            null // identificador textual
+                    );
+                }
+ 
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
 
 
         // Crear estaciones.
@@ -215,10 +277,18 @@ public class Main {
         List<CambioEstado> cambios1 = new ArrayList<>();
         List<CambioEstado> cambios2 = new ArrayList<>();
         List<CambioEstado> cambios3 = new ArrayList<>();
-        for (CambioEstado c : cambiosEstados) {
-            cambios1.add(new CambioEstado(c.getFechaHoraInicio(), c.getEstado()));
-            cambios2.add(new CambioEstado(c.getFechaHoraInicio(), c.getEstado()));
-            cambios3.add(new CambioEstado(c.getFechaHoraInicio(), c.getEstado()));
+        for (CambioEstado c : cambioEstadosSismografo) {
+            if (c.getFechaHoraFin() == null){
+                cambios1.add(new CambioEstado(c.getFechaHoraInicio(), c.getEstado()));
+                cambios2.add(new CambioEstado(c.getFechaHoraInicio(), c.getEstado()));
+                cambios3.add(new CambioEstado(c.getFechaHoraInicio(), c.getEstado()));
+            }
+            else {
+                cambios1.add(new CambioEstado(c.getFechaHoraInicio(), c.getFechaHoraFin(), c.getEstado()));
+                cambios2.add(new CambioEstado(c.getFechaHoraInicio(), c.getFechaHoraFin(), c.getEstado()));
+                cambios3.add(new CambioEstado(c.getFechaHoraInicio(), c.getFechaHoraFin(), c.getEstado()));
+            }
+
         }
 
         Sismografo sismografo1 = new Sismografo(LocalDate.of(2023,1,15), idSismografo1, "SN1001", estacion1, cambios1, fueraDeLinea);
@@ -233,7 +303,6 @@ public class Main {
 
         SismografoDao sismografoDao = new SismografoDao();
 
-        CambioEstadoDao cambioDao = new CambioEstadoDao();
 
         for (Sismografo sismografo : sismografos) {
             int idSismografo = sismografoDao.getOrCreate(
@@ -246,13 +315,25 @@ public class Main {
             for (CambioEstado cambio : sismografo.getCambiosEstado()) {
                 int idEstadoCambio = estadoDao.getIdByNombre(cambio.getEstado().getNombre());
                 try {
-                    int idCambio = cambioDao.abrir(
-                        cambio.getFechaHoraInicio(),
-                        idEstadoCambio,
-                        null, // idMotivo si corresponde
-                        idEmp1, // o el empleado correspondiente
-                        sismografo.getIdentificadorSismografo() // identificador textual
-                    );
+                    if (cambio.getFechaHoraFin() == null) {
+                        int idCambio = cambioDao.abrir(
+                                cambio.getFechaHoraInicio(),
+                                idEstadoCambio,
+                                null, // idMotivo si corresponde
+                                idEmp1, // o el empleado correspondiente
+                                sismografo.getIdentificadorSismografo() // identificador textual
+                        );
+                    } else {
+                        int idCambio = cambioDao.abrirConFin(
+                                cambio.getFechaHoraInicio(),
+                                cambio.getFechaHoraFin(),
+                                idEstadoCambio,
+                                null,
+                                idEmp1,
+                                sismografo.getIdentificadorSismografo()
+                        );
+                    }
+ 
                 } catch (Exception ex) {
                     System.err.println("[Main] Error persistiendo CambioEstado para sismografoIdentificador=" + sismografo.getIdentificadorSismografo() + ": " + ex.getMessage());
                     ex.printStackTrace();
@@ -311,7 +392,7 @@ public class Main {
         }
 
         // Crear el gestor
-        GestorCierreDeInspeccion gestor = new GestorCierreDeInspeccion(empleados);
+        GestorCierreDeInspeccion gestor = new GestorCierreDeInspeccion();
 
 
         // GUI

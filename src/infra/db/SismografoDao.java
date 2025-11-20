@@ -1,11 +1,14 @@
 package infra.db;
 
 import java.sql.*;
+
+import Clases.CambioEstado;
 import Clases.Sismografo;
 import Clases.EstacionSismologica;
 import Clases.Estado;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 public class SismografoDao {
     private static final String SQL_INSERT =
@@ -39,6 +42,8 @@ public class SismografoDao {
     }
 
     // Devuelve idSismografo (PK) para el identificador lógico (ej. "SIS-001"), o null si no existe.
+    // Alias
+
     public Integer findIdByIdentificador(String identificador) {
         String sql = "SELECT idSismografo FROM Sismografo WHERE identificadorSismografo = ?";
         try (Connection c = SQLite.get();
@@ -51,8 +56,6 @@ public class SismografoDao {
             throw new RuntimeException("Error buscando idSismografo por identificador=" + identificador, e);
         }
     }
-
-    // Alias
     public Integer getIdByIdentificador(String identificador) {
         return findIdByIdentificador(identificador);
     }
@@ -70,7 +73,7 @@ public class SismografoDao {
                 String idf = rs.getString("identificadorSismografo");
                 String fechaStr = null;
                 try { fechaStr = rs.getString("fechaAdquisicion"); } catch (SQLException ignore) {}
-                LocalDate fecha = (fechaStr != null) ? LocalDate.parse(fechaStr) : null;
+                java.time.LocalDate fecha = (fechaStr != null) ? java.time.LocalDate.parse(fechaStr) : null;
                 String nroSerie = null;
                 try { nroSerie = rs.getString("nroSerie"); } catch (SQLException ignore) {}
 
@@ -93,11 +96,69 @@ public class SismografoDao {
                     try { estado = estDao.findById(idEstadoActual); } catch (Exception ignore) { estado = null; }
                 }
 
-                // crear Sismografo con historial vacío (se puede poblar luego)
-                return new Sismografo(fecha, idf, nroSerie, estacion, new ArrayList<>(), estado);
+                // Leer cambios de estado asociados al identificador desde la tabla CambioEstado
+                List<CambioEstado> cambios = new ArrayList<>();
+                String sqlCambios = "SELECT fechaHoraInicio, fechaHoraFin, idEstado, idMotivo, idEmpleado FROM CambioEstado WHERE identificadorSismografo = ? ORDER BY idCambio";
+                try (PreparedStatement ps2 = c.prepareStatement(sqlCambios)) {
+                    ps2.setString(1, identificador);
+                    try (ResultSet rs2 = ps2.executeQuery()) {
+                        EstadoDao estadoDao = new EstadoDao();
+                        while (rs2.next()) {
+                            String inicioStr = rs2.getString("fechaHoraInicio");
+                            String finStr = rs2.getString("fechaHoraFin");
+                            java.time.LocalDateTime inicio = (inicioStr != null) ? java.time.LocalDateTime.parse(inicioStr) : null;
+                            java.time.LocalDateTime fin = (finStr != null) ? java.time.LocalDateTime.parse(finStr) : null;
+                            Integer idEstCambio = null;
+                            try { Object o = rs2.getObject("idEstado"); if (o != null) idEstCambio = rs2.getInt("idEstado"); } catch (SQLException ignore) {}
+                            Estado estCambio = null;
+                            if (idEstCambio != null) {
+                                try { estCambio = estadoDao.findById(idEstCambio); } catch (Exception ignore) { estCambio = null; }
+                            }
+                            // construir CambioEstado según disponibilidad de fecha fin
+                            try {
+                                if (fin != null) {
+                                    cambios.add(new CambioEstado(inicio, fin, estCambio));
+                                } else {
+                                    cambios.add(new CambioEstado(inicio, estCambio));
+                                }
+                            } catch (Exception e) {
+                                // si las firmas del constructor difieren, intentar mediante reflexión o saltar
+                                try {
+                                    if (fin != null) {
+                                        var ctor = CambioEstado.class.getConstructor(java.time.LocalDateTime.class, java.time.LocalDateTime.class, Estado.class);
+                                        cambios.add((CambioEstado) ctor.newInstance(inicio, fin, estCambio));
+                                    } else {
+                                        var ctor = CambioEstado.class.getConstructor(java.time.LocalDateTime.class, Estado.class);
+                                        cambios.add((CambioEstado) ctor.newInstance(inicio, estCambio));
+                                    }
+                                } catch (Exception ignored) { /* skip this cambio if cannot map */ }
+                            }
+                        }
+                    }
+                } catch (SQLException e) {
+                    // no interrumpir; en caso de error, devolvemos el sismógrafo sin historial
+                }
+
+                // construir Sismografo con la lista de cambios poblada
+                return new Sismografo(fecha, idf, nroSerie, estacion, cambios, estado);
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error buscando Sismografo por identificador=" + identificador, e);
+        }
+    }
+
+    // Nuevo: actualiza el idEstadoActual del sismógrafo identificado por su identificador lógico.
+    public void updateEstadoActual(String identificadorSismografo, Integer idEstadoActual) {
+        if (identificadorSismografo == null) throw new IllegalArgumentException("identificadorSismografo null");
+        String sql = "UPDATE Sismografo SET idEstadoActual = ? WHERE identificadorSismografo = ?";
+        try (Connection c = SQLite.get();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            if (idEstadoActual != null) ps.setInt(1, idEstadoActual);
+            else ps.setNull(1, Types.INTEGER);
+            ps.setString(2, identificadorSismografo);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error actualizando idEstadoActual para sismógrafo=" + identificadorSismografo, e);
         }
     }
 }

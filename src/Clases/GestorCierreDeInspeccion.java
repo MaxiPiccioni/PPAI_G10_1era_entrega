@@ -40,8 +40,7 @@ public class GestorCierreDeInspeccion implements ISujeto {
     // constructor existente (con Sesion) -- sin cambios
 
     // Nuevo constructor: no recibe ids ni Sesion. Recupera la última sesión activa desde la BD y la reconstruye.
-    public GestorCierreDeInspeccion(List<Empleado> empleados) {
-        this.empleados = (empleados != null) ? empleados : new ArrayList<>();
+    public GestorCierreDeInspeccion() {
 
 
         this.ordenesFiltradas = new ArrayList<>();
@@ -435,18 +434,58 @@ public class GestorCierreDeInspeccion implements ISujeto {
         estadoFueraServicio = obtenerEstadoFueraDeServicioSismografo();
         identificadorSismografo = ordenSeleccionada.getIdentificadorSismografo();
         Sismografo s = this.buscarSismografoPorIdentificador(identificadorSismografo);
-        s.sismografoEnFueraDeServicio(estadoFueraServicio, comentariosPorMotivo);
+
+        // pasar empleadoLogueado para que el CambioEstado lo contenga
+        s.sismografoEnFueraDeServicio(estadoFueraServicio, comentariosPorMotivo, empleadoLogueado);
+
+        // obtener el cambio recién creado y persistirlo (fuera de la clase Sismografo)
+
+
         this.obtenerResponsableDeReparacion();
     }
 
 
     public void obtenerResponsableDeReparacion() {
-        for (Empleado empleado : empleados) {
-            if (empleado.esResponsableDeReparacion()) {
-                emailsResponsables.add(empleado.obtenerEmail());
+        emailsResponsables.clear();
+
+        // Intentar cargar empleados desde BD y filtrar responsables de reparación
+        try {
+            infra.db.EmpleadoDao empDao = new infra.db.EmpleadoDao();
+            List<infra.db.EmpleadoDao.EmpleadoRow> rows = empDao.findAll();
+            if (rows != null && !rows.isEmpty()) {
+                for (infra.db.EmpleadoDao.EmpleadoRow r : rows) {
+                    try {
+                        Empleado e = empDao.findById(r.idEmpleado());
+                        if (e != null && e.esResponsableDeReparacion()) {
+                            String mail = e.obtenerEmail();
+
+                            if (mail != null && !mail.isBlank() && !emailsResponsables.contains(mail)) {
+                                emailsResponsables.add(mail);
+                            }
+                        }
+                    } catch (Exception ignoreOne) {
+                        // seguir con el siguiente registro
+                    }
+                }
+                notificarCierre();
+                return;
+            }
+        } catch (Exception dbEx) {
+            // si falla el acceso a BD, caer al fallback en memoria
+        }
+
+        // Fallback: usar la lista en memoria (comportamiento anterior)
+        if (this.empleados != null) {
+            for (Empleado empleado : empleados) {
+                if (empleado != null && empleado.esResponsableDeReparacion()) {
+                    String mail = empleado.obtenerEmail();
+                    if (mail != null && !mail.isBlank() && !emailsResponsables.contains(mail)) {
+                        emailsResponsables.add(mail);
+                    }
+                }
             }
         }
-        notificarCierre( );
+        notificarCierre();
     }
 
 
