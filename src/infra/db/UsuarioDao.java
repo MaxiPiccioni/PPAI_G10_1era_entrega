@@ -1,6 +1,9 @@
 package infra.db;
 
+import Clases.Usuario;
+import Clases.Empleado;
 import java.sql.*;
+import java.util.Objects;
 
 public class UsuarioDao {
 
@@ -45,5 +48,85 @@ public class UsuarioDao {
     public int getOrCreate(String nombreUsuario, String contraseña, int idEmpleado, Integer idPerfil) {
         Integer id = findIdByNombreUsuario(nombreUsuario);
         return (id != null) ? id : insert(nombreUsuario, contraseña, idEmpleado, idPerfil);
+    }
+
+    // Nuevo: busca y devuelve la entidad dominio Usuario por idUsuario (o null si no existe)
+    public Usuario findById(int idUsuario) {
+        String sql = "SELECT * FROM Usuario WHERE idUsuario = ?";
+        try (Connection c = SQLite.get();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setInt(1, idUsuario);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) return null;
+
+                // Intentar obtener campos con nombres posibles según distintos esquemas
+                String nombreUsuario = getStringSafe(rs, "nombreUsuario", "usuario", "username", "nombre_usuario");
+                String contrasena = getStringSafe(rs, "contrasena", "contrasenia", "password", "contraseña", "clave");
+                Integer idEmpleado = getIntSafe(rs, "idEmpleado", "id_empleado", "id_emp", "idEmpleadoFk", "idEmpleado");
+
+                Empleado empleado = null;
+                if (idEmpleado != null) {
+                    EmpleadoDao empDao = new EmpleadoDao();
+                    // Intentar métodos comunes del DAO
+                    try {
+                        empleado = empDao.findById(idEmpleado);
+                    } catch (NoSuchMethodError | RuntimeException e1) {
+                        try {
+                            empleado = empDao.getById(idEmpleado);
+                        } catch (Exception ignore) {
+                            empleado = null;
+                        }
+                    }
+                }
+
+                Usuario usuario = new Usuario(nombreUsuario, contrasena, empleado);
+
+                // Si la clase Usuario tiene setIdUsuario(int) lo llamamos por reflexión (opcional).
+                try {
+                    java.lang.reflect.Method m = Usuario.class.getMethod("setIdUsuario", int.class);
+                    if (m != null) m.invoke(usuario, idUsuario);
+                } catch (NoSuchMethodException ignored) {
+                    // no existe setter, está bien
+                } catch (Exception ignored) {
+                    // si falla la reflexión no detenemos la ejecución
+                }
+
+                return usuario;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error leyendo Usuario id=" + idUsuario, e);
+        }
+    }
+
+    // Alias simple
+    public Usuario getById(int idUsuario) {
+        return findById(idUsuario);
+    }
+
+    // Util: intenta leer la primera columna de texto presente entre los nombres proporcionados
+    private static String getStringSafe(ResultSet rs, String... names) throws SQLException {
+        for (String n : names) {
+            try {
+                String v = rs.getString(n);
+                if (v != null) return v;
+            } catch (SQLException ignored) {
+                // columna no existe -> siguiente
+            }
+        }
+        return null;
+    }
+
+    // Util: intenta leer la primera columna entera presente entre los nombres proporcionados
+    private static Integer getIntSafe(ResultSet rs, String... names) throws SQLException {
+        for (String n : names) {
+            try {
+                int v = rs.getInt(n);
+                if (!rs.wasNull()) return v;
+            } catch (SQLException ignored) {
+                // columna no existe -> siguiente
+            }
+        }
+        return null;
     }
 }

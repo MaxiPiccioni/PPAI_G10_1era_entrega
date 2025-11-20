@@ -1,6 +1,8 @@
 package infra.db;
 
+import Clases.Rol;
 import java.sql.*;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,6 +70,85 @@ public class RolDao {
         } catch (SQLException e) {
             throw new RuntimeException("Error listando roles", e);
         }
+    }
+
+    // Nuevo: busca y devuelve la entidad dominio Rol por idRol (o null si no existe)
+    public Rol findById(int idRol) {
+        String sql = "SELECT * FROM Rol WHERE idRol = ?";
+        try (Connection c = SQLite.get();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setInt(1, idRol);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) return null;
+
+                String nombre = getStringSafe(rs, "nombreRol", "nombre", "nombre_rol", "nombrerol");
+                String descripcion = getStringSafe(rs, "descripcionRol", "descripcion", "descripcion_rol", "descripcionrol");
+
+                Rol rol;
+                try {
+                    rol = new Rol(nombre);
+                } catch (Throwable t) {
+                    try {
+                        rol = (Rol) Rol.class.getDeclaredConstructor().newInstance();
+                        // intentar setear nombre por reflexión (si existe)
+                        try {
+                            Method m = Rol.class.getMethod("setNombreRol", String.class);
+                            m.invoke(rol, nombre);
+                        } catch (ReflectiveOperationException ignore) {
+                            // si no existe el setter o falla, continuamos sin él
+                        }
+                    } catch (Exception ex) {
+                        throw new RuntimeException("No se pudo instanciar Rol desde DB", ex);
+                    }
+                }
+
+                // intentar asignar descripcion si existe setter
+                try {
+                    Method mDesc = Rol.class.getMethod("setDescripcionRol", String.class);
+                    mDesc.invoke(rol, descripcion);
+                } catch (ReflectiveOperationException ignore) {
+                    // no existe o no se puede invocar -> ignorar
+                }
+
+                // intentar asignar idRol probando tanto int como Integer
+                try {
+                    Method mIdPrim = Rol.class.getMethod("setIdRol", int.class);
+                    mIdPrim.invoke(rol, idRol);
+                } catch (NoSuchMethodException e1) {
+                    try {
+                        Method mIdObj = Rol.class.getMethod("setIdRol", Integer.class);
+                        mIdObj.invoke(rol, Integer.valueOf(idRol));
+                    } catch (ReflectiveOperationException ignore) {
+                        // no existe setter para id, lo ignoramos
+                    }
+                } catch (ReflectiveOperationException ignore) {
+                    // problemas al invocar, ignoramos para no romper la lectura
+                }
+
+                return rol;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error leyendo Rol id=" + idRol, e);
+        }
+    }
+
+    // Alias simple
+    public Rol getById(int idRol) {
+        return findById(idRol);
+    }
+
+    // Util: intenta leer la primera columna de texto presente entre los nombres proporcionados
+    private static String getStringSafe(ResultSet rs, String... names) throws SQLException {
+        for (String n : names) {
+            try {
+                String v = rs.getString(n);
+                if (v != null) return v;
+            } catch (SQLException ignored) {
+                // columna no existe -> siguiente
+            }
+        }
+        return null;
     }
 
     // DTO liviano para no depender de tu clase de dominio

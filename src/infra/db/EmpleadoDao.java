@@ -1,5 +1,8 @@
 package infra.db;
 
+import Clases.Empleado;
+import Clases.Rol;
+
 import java.sql.*;
 import java.util.List;
 import java.util.ArrayList;
@@ -70,6 +73,82 @@ public class EmpleadoDao {
         } catch (SQLException e) {
             throw new RuntimeException("Error listando empleados", e);
         }
+    }
+
+    // Nuevo: busca y devuelve la entidad dominio Empleado por idEmpleado (o null si no existe)
+    public Empleado findById(int idEmpleado) {
+        String sql = "SELECT * FROM Empleado WHERE idEmpleado = ?";
+        try (Connection c = SQLite.get();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setInt(1, idEmpleado);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) return null;
+
+                String nombre = getStringSafe(rs, "nombre", "nombreEmpleado", "nombre_empleado");
+                String apellido = getStringSafe(rs, "apellido", "apellidoEmpleado", "apellido_empleado");
+                String telefono = getStringSafe(rs, "telefono", "telefonoEmpleado", "telefono_empleado", "tel");
+                String email = getStringSafe(rs, "email", "mail", "correo", "correo_electronico");
+                Integer idRol = getIntSafe(rs, "idRol", "id_rol", "idRolFk", "idRolEmpleado", "rol_id");
+
+                Rol rol = null;
+                if (idRol != null) {
+                    RolDao rolDao = new RolDao();
+                    try {
+                        rol = rolDao.findById(idRol);
+                    } catch (NoSuchMethodError | RuntimeException ex) {
+                        try { rol = rolDao.getById(idRol); } catch (Exception ignore) { rol = null; }
+                    }
+                }
+
+                Empleado empleado = new Empleado(nombre, apellido, telefono, email, rol);
+
+                // Si la clase Empleado tiene setIdEmpleado(int) lo asignamos por reflexión (opcional).
+                try {
+                    java.lang.reflect.Method m = Empleado.class.getMethod("setIdEmpleado", int.class);
+                    if (m != null) m.invoke(empleado, idEmpleado);
+                } catch (NoSuchMethodException ignored) {
+                    // no existe setter, no pasa nada
+                } catch (Exception ignored) {
+                    // ignorar errores de reflexión
+                }
+
+                return empleado;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error leyendo Empleado id=" + idEmpleado, e);
+        }
+    }
+
+    // Alias simple
+    public Empleado getById(int idEmpleado) {
+        return findById(idEmpleado);
+    }
+
+    // Util: intenta leer la primera columna de texto presente entre los nombres proporcionados
+    private static String getStringSafe(ResultSet rs, String... names) throws SQLException {
+        for (String n : names) {
+            try {
+                String v = rs.getString(n);
+                if (v != null) return v;
+            } catch (SQLException ignored) {
+                // columna no existe -> siguiente
+            }
+        }
+        return null;
+    }
+
+    // Util: intenta leer la primera columna entera presente entre los nombres proporcionados
+    private static Integer getIntSafe(ResultSet rs, String... names) throws SQLException {
+        for (String n : names) {
+            try {
+                int v = rs.getInt(n);
+                if (!rs.wasNull()) return v;
+            } catch (SQLException ignored) {
+                // columna no existe -> siguiente
+            }
+        }
+        return null;
     }
 
     public record EmpleadoRow(

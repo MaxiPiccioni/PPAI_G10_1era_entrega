@@ -19,7 +19,7 @@ public class Sismografo {
         this.identificadorSismografo = identificadorSismografo;
         this.nroSerie = nroSerie;
         this.estacionSismologica = estacionSismologica;
-        this.cambiosEstado = new ArrayList<>();
+        this.cambiosEstado = cambioEstado;
         this.estadoActual = estadoActual;
     }
 
@@ -67,15 +67,53 @@ public class Sismografo {
 
     public void sismografoEnFueraDeServicio(Estado estadoFueraServicio,
                                             Map<MotivoTipo, String> comentariosPorMotivo) {
+        // 1) cerrar vigente en memoria y en BD
         CambioEstado vigente = obtenerCambioEstadoVigente();
 
+        LocalDateTime ahora = LocalDateTime.now();
+
         if (vigente != null) {
-            // Si tu setter pone "ahora" por defecto, dejalo sin argumento.
-            // Si no, pasale LocalDateTime.now().
-            vigente.setFechaHoraFin(); // o vigente.setFechaHoraFin(LocalDateTime.now());
+            // actualizar en memoria
+            vigente.setFechaHoraFin(); // si este método pone ahora por defecto
+            // intentar cerrar en BD (por identificador textual)
+            try {
+                infra.db.CambioEstadoDao cambioDao = new infra.db.CambioEstadoDao();
+                cambioDao.cerrarVigentePorIdentificador(this.identificadorSismografo, ahora);
+            } catch (Exception e) {
+                // no rompemos el flujo; sólo log para debug
+                System.err.println("No se pudo cerrar cambio vigente en BD para sismógrafo " + this.identificadorSismografo + ": " + e.getMessage());
+            }
         }
 
+        // 2) crear nuevo cambio en memoria (y persistir en BD)
         crearNuevoCambioDeEstado(estadoFueraServicio, comentariosPorMotivo);
+        CambioEstado nuevo = obtenerUltimoCambioDeEstado();
+
+        // intentar persistir apertura del nuevo cambio en BD
+        try {
+            // resolver idEstado (si possible) a través de EstadoDao
+            Integer idEstado = null;
+            try {
+                infra.db.EstadoDao ed = new infra.db.EstadoDao();
+                String amb = null;
+                String nom = null;
+                try { java.lang.reflect.Method ma = Estado.class.getMethod("getAmbito"); amb = (String) ma.invoke(estadoFueraServicio); } catch (Exception ignore) {}
+                try { java.lang.reflect.Method mn = Estado.class.getMethod("getNombre"); nom = (String) mn.invoke(estadoFueraServicio); } catch (Exception ignore) {}
+                idEstado = ed.findIdByAmbitoYNombre(amb, nom);
+            } catch (Exception ignore) { /* si falla, idEstado queda null y DAO puede decidir */ }
+
+            infra.db.CambioEstadoDao cambioDao = new infra.db.CambioEstadoDao();
+            // idMotivo no manejado aquí -> null; idEmpleado desconocido en este contexto -> null
+            cambioDao.abrir(
+                nuevo.getFechaHoraInicio(),
+                (idEstado != null ? idEstado : 0), // si no hay idEstado, se pasa 0 (o ajustar según esquema)
+                null, // idMotivo
+                null, // idEmpleado (DAO acepta Integer ahora)
+                this.identificadorSismografo
+            );
+        } catch (Exception e) {
+            System.err.println("No se pudo persistir apertura de CambioEstado para sismógrafo " + this.identificadorSismografo + ": " + e.getMessage());
+        }
     }
 
 

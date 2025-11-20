@@ -211,9 +211,19 @@ public class Main {
 
 
         // Crear sismógrafos y asociarlos a estaciones.
-        Sismografo sismografo1 = new Sismografo(LocalDate.of(2023,1,15), idSismografo1, "SN1001", estacion1, cambiosEstados, fueraDeLinea);
-        Sismografo sismografo2 = new Sismografo(LocalDate.of(2024,3,10), idSismografo2, "SN1002", estacion2, cambiosEstados, fueraDeLinea);
-        Sismografo sismografo3 = new Sismografo(LocalDate.of(2022,6,5), idSismografo3, "SN1003", estacion3, cambiosEstados, fueraDeLinea);
+        // Crear listas de cambios independientes (clonar los objetos CambioEstado)
+        List<CambioEstado> cambios1 = new ArrayList<>();
+        List<CambioEstado> cambios2 = new ArrayList<>();
+        List<CambioEstado> cambios3 = new ArrayList<>();
+        for (CambioEstado c : cambiosEstados) {
+            cambios1.add(new CambioEstado(c.getFechaHoraInicio(), c.getEstado()));
+            cambios2.add(new CambioEstado(c.getFechaHoraInicio(), c.getEstado()));
+            cambios3.add(new CambioEstado(c.getFechaHoraInicio(), c.getEstado()));
+        }
+
+        Sismografo sismografo1 = new Sismografo(LocalDate.of(2023,1,15), idSismografo1, "SN1001", estacion1, cambios1, fueraDeLinea);
+        Sismografo sismografo2 = new Sismografo(LocalDate.of(2024,3,10), idSismografo2, "SN1002", estacion2, cambios2, fueraDeLinea);
+        Sismografo sismografo3 = new Sismografo(LocalDate.of(2022,6,5), idSismografo3, "SN1003", estacion3, cambios3, fueraDeLinea);
 
         List<Sismografo> sismografos = new ArrayList<>();
         sismografos.add(sismografo1);
@@ -235,13 +245,18 @@ public class Main {
             );
             for (CambioEstado cambio : sismografo.getCambiosEstado()) {
                 int idEstadoCambio = estadoDao.getIdByNombre(cambio.getEstado().getNombre());
-                cambioDao.abrir(
-                    cambio.getFechaHoraInicio(),
-                    idEstadoCambio,
-                    null, // idMotivo si corresponde
-                    idEmp1, // o el empleado correspondiente
-                    idSismografo // identificadorSismografo correcto
-                );
+                try {
+                    int idCambio = cambioDao.abrir(
+                        cambio.getFechaHoraInicio(),
+                        idEstadoCambio,
+                        null, // idMotivo si corresponde
+                        idEmp1, // o el empleado correspondiente
+                        sismografo.getIdentificadorSismografo() // identificador textual
+                    );
+                } catch (Exception ex) {
+                    System.err.println("[Main] Error persistiendo CambioEstado para sismografoIdentificador=" + sismografo.getIdentificadorSismografo() + ": " + ex.getMessage());
+                    ex.printStackTrace();
+                }
             }
         }
 
@@ -296,7 +311,7 @@ public class Main {
         }
 
         // Crear el gestor
-        GestorCierreDeInspeccion gestor = new GestorCierreDeInspeccion(empleados, sesionActiva, ordenes, motivoTipos, estados, sismografos);
+        GestorCierreDeInspeccion gestor = new GestorCierreDeInspeccion(empleados);
 
 
         // GUI

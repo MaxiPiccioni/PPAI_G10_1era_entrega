@@ -191,7 +191,7 @@ public class PantallaCierreOrdenInspeccion extends JFrame {
 
     public void pedirTipos(){
         dispose();
-        List<String> motivosTipo= gestor.buscarTiposMotivo();
+        List<String> motivosTipo = gestor.buscarTiposMotivo();
         tomarTipos(motivosTipo);
     }
 

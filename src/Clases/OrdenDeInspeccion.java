@@ -52,8 +52,56 @@ public class OrdenDeInspeccion {
     }
 
 
-    public boolean esDeRI(Empleado ri) {
-        return this.empleado.equals(ri);
+    public boolean esDeRI(Empleado riLogueado) {
+        // protección básica
+        if (riLogueado == null) return false;
+
+        // asumo que la orden tiene un atributo 'empleado' o similar que representa al RI responsable.
+        // intentamos acceder primero al campo/propiedad 'empleado' vía getter si existe, sino uso el campo directo.
+        Empleado empleadoOrden = null;
+        try {
+            // intentar getter "getEmpleado"
+            java.lang.reflect.Method gm = this.getClass().getMethod("getEmpleado");
+            empleadoOrden = (Empleado) gm.invoke(this);
+        } catch (Exception ignored) {
+            try {
+                // intentar acceder campo directo "empleado"
+                java.lang.reflect.Field f = this.getClass().getDeclaredField("empleado");
+                f.setAccessible(true);
+                empleadoOrden = (Empleado) f.get(this);
+            } catch (Exception ignored2) {
+                // no pudimos obtener empleado de la orden -> no es de RI
+                return false;
+            }
+        }
+
+        if (empleadoOrden == null) return false;
+
+        // 1) comparar por id si existe getIdEmpleado()
+        try {
+            java.lang.reflect.Method mId = Empleado.class.getMethod("getIdEmpleado");
+            Object idOrden = mId.invoke(empleadoOrden);
+            Object idLog = mId.invoke(riLogueado);
+            if (idOrden != null && idLog != null) {
+                return idOrden.equals(idLog);
+            }
+        } catch (Exception ignored) {
+            // si no existe getIdEmpleado, seguimos con el siguiente criterio
+        }
+
+        // 2) comparar por email (método obtenerEmail() presente en tu modelo)
+        try {
+            String emailOrden = empleadoOrden.obtenerEmail();
+            String emailLog = riLogueado.obtenerEmail();
+            if (emailOrden != null && emailLog != null) {
+                return emailOrden.equalsIgnoreCase(emailLog);
+            }
+        } catch (Exception ignored) {
+            // si no existe obtenerEmail o falla, fallback a equals()
+        }
+
+        // 3) fallback a equals del objeto Empleado
+        return empleadoOrden.equals(riLogueado);
     }
 
 
@@ -76,9 +124,18 @@ public class OrdenDeInspeccion {
 
 
     public void cerrar(Estado estado, LocalDateTime fechaHoraCierre, String observacionCierre) {
+        // setear en memoria
         setEstado(estado);
         setObservacion(observacionCierre);
         setFechaHoraCierre(fechaHoraCierre);
+
+        // Delegar persistencia a la DAO (la DAO se encarga de resolver idEstado)
+        try {
+            infra.db.OrdenDeInspeccionDao ordenDao = new infra.db.OrdenDeInspeccionDao();
+            ordenDao.actualizarCierre(this.getNumeroOrden(), estado, fechaHoraCierre, observacionCierre);
+        } catch (Exception e) {
+            System.err.println("No se pudo persistir cierre de orden " + this.numeroOrden + ": " + e.getMessage());
+        }
     }
 
 
@@ -141,6 +198,6 @@ public class OrdenDeInspeccion {
     }
 
     public Estado getEstado() {
-        return this.estado = estado;
+        return this.estado;
     }
 }
