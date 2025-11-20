@@ -36,7 +36,7 @@ public class Estado {
 
 
     public boolean esEnLinea() {
-        return nombreEstado.equals("en Línea");
+        return nombreEstado.equals("En Linea");
     }
 
 

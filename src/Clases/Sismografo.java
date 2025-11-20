@@ -72,8 +72,23 @@ public class Sismografo {
 
 
 
-    public void sismografoEnLinea(Estado estadoEnLinea) {
-        setEstadoActual(estadoEnLinea);
+    public void sismografoEnLinea(Estado estadoEnLinea, Empleado empleado) {
+        CambioEstado vigente = obtenerCambioEstadoVigente();
+
+        LocalDateTime ahora = LocalDateTime.now();
+
+        if (vigente != null) {
+            vigente.setFechaHoraFin(); // actualizar en memoria
+            try {
+                infra.db.CambioEstadoDao cambioDao = new infra.db.CambioEstadoDao();
+                cambioDao.cerrarVigentePorIdentificador(this.identificadorSismografo, ahora);
+            } catch (Exception e) {
+                System.err.println("No se pudo cerrar cambio vigente en BD para sismógrafo " + this.identificadorSismografo + ": " + e.getMessage());
+            }
+        }
+        this.crearNuevoCambioDeEstado(estadoEnLinea, null, empleado);
+
+
     }
 
 

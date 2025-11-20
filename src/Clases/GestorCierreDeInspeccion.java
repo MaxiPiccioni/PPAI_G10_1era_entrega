@@ -15,7 +15,6 @@ import java.sql.*; // para fallback SQL
 public class GestorCierreDeInspeccion implements ISujeto {
     private OrdenDeInspeccion ordenSeleccionada;
     private String observacionIngresada;
-    private List<Empleado> empleados;
     private SesionDao sesionDao = new SesionDao();
     private Sesion sesion;
     private Empleado empleadoLogueado;
@@ -474,17 +473,7 @@ public class GestorCierreDeInspeccion implements ISujeto {
             // si falla el acceso a BD, caer al fallback en memoria
         }
 
-        // Fallback: usar la lista en memoria (comportamiento anterior)
-        if (this.empleados != null) {
-            for (Empleado empleado : empleados) {
-                if (empleado != null && empleado.esResponsableDeReparacion()) {
-                    String mail = empleado.obtenerEmail();
-                    if (mail != null && !mail.isBlank() && !emailsResponsables.contains(mail)) {
-                        emailsResponsables.add(mail);
-                    }
-                }
-            }
-        }
+
         notificarCierre();
     }
 
@@ -534,13 +523,8 @@ public class GestorCierreDeInspeccion implements ISujeto {
 
 
     public Estado obtenerEstadoEnLineaSismografo() {
-        // asegurar que la lista de estados esté poblada (lazy load)
-        if (this.estados == null || this.estados.isEmpty()) {
-            cargarEstadosDesdeBD();
-        }
-        if (this.estados == null) return null;
-
         for (Estado estado : this.estados) {
+
             if (estado != null && estado.esEnLinea() && estado.esAmbitoSismografo()) {
                 return estado;
             }
@@ -553,7 +537,7 @@ public class GestorCierreDeInspeccion implements ISujeto {
         Estado estadoEnLinea = obtenerEstadoEnLineaSismografo();
         identificadorSismografo = ordenSeleccionada.getIdentificadorSismografo();
         Sismografo s = this.buscarSismografoPorIdentificador(identificadorSismografo);
-        s.sismografoEnLinea(estadoEnLinea);
+        s.sismografoEnLinea(estadoEnLinea, empleadoLogueado);
     }
 
 
